@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Routing.Constraints;
 using WebApplication1;
 
 internal class Program
@@ -20,6 +21,10 @@ internal class Program
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, SlimJsonContext.Default);
         });
+        builder.Services.Configure<RouteOptions>(options => 
+        {
+            options.SetParameterPolicy<RegexInlineRouteConstraint>("regex");
+        });
 
         var app = builder.Build();
 
@@ -32,11 +37,13 @@ internal class Program
         app.UseHttpsRedirection();
 
         app.MapGroup("/weatherforecast")
+            .AddEndpointFilter<LogginFilter>()
             .AddEndpointFilter<ValidateRequestEndpointFilter>()
             .UseSlimEndpointsweatherforecast();
 
         app.MapGroup("/products")
             .AllowAnonymous()
+            .AddEndpointFilter<LogginFilter>()
             .AddEndpointFilter<ValidateRequestEndpointFilter>()
             .UseSlimEndpointsProducts();
         

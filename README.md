@@ -286,7 +286,7 @@ SlimEndpoints is compatible with AOT compilation
 // Program.cs
 // Use CreateSlimBuilder instead of CreateBuilder
 var builder = WebApplication.CreateSlimBuilder(args);
-
+builder.Services.AddSlimEndpoints();
 ...
 // Inject types into SerializationContext
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -295,6 +295,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 ...
 var app = builder.Build();
+
+app.MapGroup("/products")
+    .AllowAnonymous()
+    .AddEndpointFilter<ValidateRequestEndpointFilter>()
+    .UseSlimEndpointsProducts();
 ...
 
 // SlimJsonContext.cs
@@ -308,4 +313,52 @@ using WebApplication1.Endpoints.Products;
 public partial class SlimJsonContext : JsonSerializerContext
 {
 }
+```
+
+## Implementing additional logic
+
+You can implement additional logic in the handler, for example, logging, metrics, etc., using filters as the same way you use Minimal apis.
+```csharp
+// Exceptions filter
+app.UseExceptionHandler(exceptionapp =>
+    exceptionapp.Run(async context =>
+    {
+        var ex = context.Features.Get<IExceptionHandlerFeature>();
+        await Results.Problem(title: ex?.Error?.Message ?? "Un error ha ocurrido")
+            .ExecuteAsync(context);
+    })
+);
+
+
+
+// Logging filter with stopwatcher
+internal class LogginFilter(ILoggerFactory loggerFactory) : IEndpointFilter
+{
+    private readonly ILoggerFactory _loggerFactory = loggerFactory;
+
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        Type implementation = context.Arguments[0]!.GetType();
+        var logger = _loggerFactory.CreateLogger(implementation.Name);
+        logger.LogInformation("Executing {implementation}", implementation.Name);
+
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        var result = await next(context);
+
+        logger.LogInformation("Executed {implementation}, time ellapsed in seconds {seconds}", implementation.Name, stopwatch.ElapsedMilliseconds / 1000);
+        stopwatch.Stop();
+        return result;
+    }
+}
+// Implementation Program.cs
+app.MapGroup("/products")
+    .AllowAnonymous()
+    // Order matters
+    .AddEndpointFilter<LogginFilter>()
+    .AddEndpointFilter<ValidateRequestEndpointFilter>()
+    .UseSlimEndpointsProducts();
+
+
 ```

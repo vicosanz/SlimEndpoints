@@ -2,7 +2,7 @@
 
 namespace WebApplication1.Endpoints.Products.GetById
 {
-    [SlimEndpoint("/byid/{id}", [HttpMehotds.Get], "Products")]
+    [SlimEndpoint("/byid/{id}", [HttpMehotds.Get], group: "Products")]
     public class GetProductByIdHandler : SlimEndpoint<GetProductsRequest, Product>
     {
         public override IResult Validate(GetProductsRequest request)

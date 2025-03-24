@@ -126,6 +126,13 @@ namespace SlimEndpoints.AOT.Generator
                         // report diagnostic, something went wrong
                         continue;
                     }
+                    if (requestTypeSymbol.DeclaringSyntaxReferences.Length == 0)
+                    {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(DiagnosticDescriptors.RequestTypeIsPrimitive, null, requestTypeSymbol.ToString(), typeSymbol.Name)
+                        );
+                        continue;
+                    }
                     isRequestTypePositionRecord = requestTypeSymbol.IsRecord && ((INamedTypeSymbol)requestTypeSymbol).Constructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length > 0);
                     requestTypeSymbolProperties = [.. 
                         requestTypeSymbol.GetMembers().OfType<IPropertySymbol>()
@@ -147,7 +154,7 @@ namespace SlimEndpoints.AOT.Generator
                             route = attribute.ConstructorArguments.First().Value!.ToString();
                             if (attribute.ConstructorArguments.Count() > 1)
                             {
-                                verbs = attribute.ConstructorArguments[1].Values.Select(x => x.Value!.ToString()).ToArray();
+                                verbs = [.. attribute.ConstructorArguments[1].Values.Select(x => x.Value!.ToString())];
                             }
                             if (attribute.ConstructorArguments.Count() > 2)
                             {

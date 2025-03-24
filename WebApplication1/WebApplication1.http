@@ -39,3 +39,11 @@ Accept: application/json
 ###
 GET {{WebApplication1_HostAddress}}/products/byid/0
 Accept: application/json
+
+###
+POST {{WebApplication1_HostAddress}}/products/slug/_%201
+Content-Type: application/json
+
+{
+  "Name": "Laptop"
+}
