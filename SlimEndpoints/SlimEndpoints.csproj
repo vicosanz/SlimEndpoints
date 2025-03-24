@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <LangVersion>Latest</LangVersion>
+    <Description>Implementation of SlimEndpoints.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/vicosanz/SlimEndpoints</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vicosanz/SlimEndpoints</RepositoryUrl>
+    <Authors>Victor Sanchez</Authors>
+    <Company>Infoware Soluciones</Company>
+    <Version>1.0.0</Version>
+    <PackageReleaseNotes>Implementation of SlimEndpoints.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SlimEndpoints.Generator\SlimEndpoints.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>

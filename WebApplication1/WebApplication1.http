@@ -1,0 +1,41 @@
+@WebApplication1_HostAddress = http://localhost:5202
+
+GET {{WebApplication1_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+
+GET {{WebApplication1_HostAddress}}/weatherforecast/1
+Accept: application/json
+
+###
+
+
+GET {{WebApplication1_HostAddress}}/weatherforecast/10?name=abc
+Accept: application/json
+
+###
+
+POST {{WebApplication1_HostAddress}}/weatherforecast/update 
+Content-Type: application/json
+
+{
+  "Name": "none"
+}
+###
+
+POST {{WebApplication1_HostAddress}}/weatherforecast/update/1 
+Content-Type: application/json
+
+{
+  "Name": "Laptop"
+}
+
+###
+GET {{WebApplication1_HostAddress}}/products/products
+Accept: application/json
+
+###
+GET {{WebApplication1_HostAddress}}/products/byid/0
+Accept: application/json
