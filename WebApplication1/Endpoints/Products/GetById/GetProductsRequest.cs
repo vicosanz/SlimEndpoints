@@ -3,11 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.Endpoints.Products.GetById
 {
-    public class GetProductsRequest
-    {
-        [FromRoute]
-        public int Id { get; set; }
-    }
+    public record GetProductsRequest(int Id);
 
 
     public class GetProductsRequestValidator : AbstractValidator<GetProductsRequest>

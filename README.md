@@ -179,6 +179,24 @@ public class GetProductByIdHandler : SlimEndpoint<GetProductsRequest, Product>
 }
 ```
 
+## Dependency Injection
+
+SlimEndpoints.AOT is compatible with dependency injection. You can inject services directly into the handler.
+
+```csharp
+[SlimEndpoint("/byid/{id}", HttpMehotds.Get, "Products")]
+public class GetProductByIdHandler(IRepositoryProducts repositoryProducts) : SlimEndpoint<GetProductsRequest, Product>
+{
+    private readonly IRepositoryProducts _repositoryProducts = repositoryProducts;
+
+    public override async Task<Product> HandleAsync(HttpContext httpContext, GetProductsRequest request, CancellationToken cancellationToken)
+    {
+        var product = await _repositoryProducts.GetProductByIdAsync(request.Id);
+        return product;
+    }
+}
+```
+
 ## Validation
 
 Activate validation in Program.cs
@@ -197,8 +215,12 @@ public class GetProductByIdHandler : SlimEndpoint<GetProductsRequest, Product>
     public override IResult Validate(GetProductsRequest request)
     {
         // Basic request validation
-        return request.Id == 0 
-            ? Results.BadRequest(TypedResults.Problem("id must be greater than 0", statusCode: 400).ProblemDetails) 
+        return request.Id == 0
+            ? Results.Problem(title: "An error ocurred", statusCode: 400, 
+                extensions: new Dictionary<string, object?>()
+                {
+                    ["Id"] = "id must be greater than 0"
+                })
             : Results.Ok();
     }
 
@@ -244,7 +266,7 @@ public static class FluentValidationResultExtensions
     {
         if (result.IsValid)
         {
-            Results.Ok();
+            return Results.Ok();
         }
         return Results.Problem(title: "An error ocurred", statusCode: 400, extensions: result.Errors.Select(x => new KeyValuePair<string, object?>(x.PropertyName, x.ErrorMessage)));
     }

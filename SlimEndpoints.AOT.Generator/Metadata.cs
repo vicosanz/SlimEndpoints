@@ -18,7 +18,7 @@ namespace SlimEndpoints.AOT.Generator
     /// <param name="AdditionalConverters"> Array of additional converters </param>
     public record Metadata(string Namespace, IReadOnlyList<string> Usings,
         bool AllowNulls, string Name, string NameTyped, string FullName, string Modifiers,
-        string RequestType, string ResponseType, List<TypeProperty>? RequestTypeProperties, string Route, string[] Verbs, string Group)
+        string RequestType, string ResponseType, bool IsRequestTypePositionRecord, List<TypeProperty>? RequestTypeProperties, string Route, string[] Verbs, string Group)
     {
         /// <summary>
         /// The namespace found in the base struct
@@ -65,12 +65,12 @@ namespace SlimEndpoints.AOT.Generator
         /// </summary>
         public string ResponseType { get; internal set; } = ResponseType;
 
+        public bool IsRequestTypePositionRecord { get; internal set; } = IsRequestTypePositionRecord;
+
         public List<TypeProperty>? RequestTypeProperties { get; internal set; } = RequestTypeProperties;
 
-        internal string GetBaseInnerType() => ResponseType ?? RequestType;
-        internal bool IsInnerTypePrimitiveOrId() => GeneratorHelpers.IsTypePrimitiveOrId(RequestType);
+        internal bool IsRequestTypePrimitiveOrId() => GeneratorHelpers.IsTypePrimitiveOrId(RequestType);
 
-        internal bool IsBaseInnerTypePrimitiveOrId() => GeneratorHelpers.IsTypePrimitiveOrId(GetBaseInnerType());
         public string Route { get; internal set; } = Route;
         public string[] Verbs{ get; internal set; } = Verbs;
         public string Group { get; internal set; } = Group;

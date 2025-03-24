@@ -76,12 +76,21 @@ namespace SlimEndpoints.AOT.Generator
                     propertiesWithTypeAndAnnotations = string.Join(", ", metadata.RequestTypeProperties.Select(x => $"{x.Annotations}{x.Type} {x.Name}")) + ", ";
                     propertiesWithType = string.Join(", ", metadata.RequestTypeProperties.Select(x => $"{x.Type} {x.Name}")) + ", ";
                     propertiesNames = string.Join(", ", metadata.RequestTypeProperties?.Select(x => $"{x.Name}")) + ", ";
-                    propertiesParse = string.Join(", ", metadata.RequestTypeProperties?.Select(x => $"{x.Name} = {x.Name}"));
+                    if (metadata.IsRequestTypePositionRecord)
+                    {
+                        propertiesParse = string.Join(", ", metadata.RequestTypeProperties?.Select(x => $"{x.Name}"));
+                    }
+                    else
+                    {
+                        propertiesParse = string.Join(", ", metadata.RequestTypeProperties?.Select(x => $"{x.Name} = {x.Name}"));
+                    }
                     int param = 0;
                     propertiesFromContext = string.Join(", ", metadata.RequestTypeProperties?.Select(x =>
                     {
                         param++;
-                        return $"{x.Name} = context.GetArgument<{x.Type}>({param})";
+                        return metadata.IsRequestTypePositionRecord
+                            ? $"context.GetArgument<{x.Type}>({param})"
+                            : $"{x.Name} = context.GetArgument<{x.Type}>({param})";
                     }));
                 }
                 else
@@ -123,7 +132,14 @@ namespace SlimEndpoints.AOT.Generator
                 {
                     if (!string.IsNullOrWhiteSpace(propertiesParse))
                     {
-                        WriteLine($"var request = new {metadata.RequestType} {{{propertiesParse}}};");
+                        if (metadata.IsRequestTypePositionRecord)
+                        {
+                            WriteLine($"var request = new {metadata.RequestType}({propertiesParse});");
+                        }
+                        else
+                        {
+                            WriteLine($"var request = new {metadata.RequestType} {{{propertiesParse}}};");
+                        }
                     }
                     WriteLine($"return await endpoint.HandleAsync(httpContext, request, cancellationToken);");
                 }
@@ -140,7 +156,14 @@ namespace SlimEndpoints.AOT.Generator
                 }
                 else
                 {
-                    WriteLine($"var request = new {metadata.RequestType}(){{ {propertiesFromContext} }};");
+                    if (metadata.IsRequestTypePositionRecord)
+                    {
+                        WriteLine($"var request = new {metadata.RequestType}({propertiesFromContext});");
+                    }
+                    else
+                    {
+                        WriteLine($"var request = new {metadata.RequestType}(){{ {propertiesFromContext} }};");
+                    }
                 }
                 WriteLine("return request;");
             });

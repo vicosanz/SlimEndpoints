@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
-using SlimEndpoints.AOT;
+﻿using SlimEndpoints.AOT;
 
 namespace WebApplication1.Endpoints.Products.GetById
 {

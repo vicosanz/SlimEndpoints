@@ -88,6 +88,7 @@ namespace SlimEndpoints.AOT.Generator
                 TypeSyntax? requestTypeSyntax = null;
                 string requestType = "SlimEndpoints.AOT.Unit";
                 string responseType = "SlimEndpoints.AOT.Unit";
+                bool isRequestTypePositionRecord = false;
 
                 if (type.BaseList != null)
                 {
@@ -125,7 +126,12 @@ namespace SlimEndpoints.AOT.Generator
                         // report diagnostic, something went wrong
                         continue;
                     }
-                    requestTypeSymbolProperties = [.. requestTypeSymbol.GetMembers().OfType<IPropertySymbol>().Select(x => new TypeProperty(x.Type, x.Name, x.GetAnnotations()))];
+                    isRequestTypePositionRecord = requestTypeSymbol.IsRecord && ((INamedTypeSymbol)requestTypeSymbol).Constructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length > 0);
+                    requestTypeSymbolProperties = [.. 
+                        requestTypeSymbol.GetMembers().OfType<IPropertySymbol>()
+                            .Where(x => x.DeclaredAccessibility == Accessibility.Public)
+                            .Select(x => new TypeProperty(x.Type, x.Name, x.GetAnnotations()))
+                        ];
                 }
 
                 string route = "";
@@ -160,6 +166,7 @@ namespace SlimEndpoints.AOT.Generator
                                         modifiers,
                                         requestType,
                                         responseType,
+                                        isRequestTypePositionRecord,
                                         requestTypeSymbolProperties,
                                         route,
                                         verbs,
