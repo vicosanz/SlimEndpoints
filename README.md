@@ -1,10 +1,10 @@
-# SlimEndpoints
+# SlimEndpoints.AOT
 C# Implementation of SlimEndpoints. Compatible 100% with AOT compilation.
 This library create a wrapper for minimal apis but implementing REPR (Resource, Endpoint, Processor, Response) pattern.
 
-SlimEndpoints [![NuGet Badge](https://buildstats.info/nuget/SlimEndpoints)](https://www.nuget.org/packages/SlimEndpoints/)
+SlimEndpoints.AOT [![NuGet Badge](https://buildstats.info/nuget/SlimEndpoints.AOT)](https://www.nuget.org/packages/SlimEndpoints.AOT/)
 
-SlimEndpoints.Generator [![NuGet Badge](https://buildstats.info/nuget/SlimEndpoints.Generator)](https://www.nuget.org/packages/SlimEndpoints.Generator/)
+SlimEndpoints.AOT.Generator [![NuGet Badge](https://buildstats.info/nuget/SlimEndpoints.AOT.Generator)](https://www.nuget.org/packages/SlimEndpoints.AOT.Generator/)
 
 [![publish to nuget](https://github.com/vicosanz/SlimEndpoints/actions/workflows/main.yml/badge.svg)](https://github.com/vicosanz/SlimEndpoints/actions/workflows/main.yml)
 
@@ -29,7 +29,7 @@ app.MapPost("/products", (Product newProduct) =>
 });
 ```
 
-In order to create a REPR pattern compatible API, you can use SlimEndpoints library. 
+In order to create a REPR pattern compatible API, you can use SlimEndpoints.AOT library. 
 
 ```csharp
 // Endpoints/Products/Product.cs
@@ -87,6 +87,66 @@ app.MapGroup("/products")
 
 ```
 
+## Parameters declaration
+
+As you can see in the example, the request is a class with the Route parameter as a property. The source generator rewrite each property into a delegate compatible with minimal apis included all of his decorators.
+In the case of POST, PUT, PATCH and if route no declare parameters like "/UpdateProduct/{id}" asume whole request as a [FromBody] parameter.
+You can override parameter behaviour following minimal apis parameter binding, please see https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/parameter-binding?view=aspnetcore-9.0
+If you need a service parameter inject directly in the handler, DO NOT put the service as a property into the request with [FromService]
+See the following examples:
+
+```csharp
+// GET request
+public class GetProductsRequest
+{
+    public int Id { get; set; }
+    public string Filter { get; set; }
+}
+// Source generated delegate parameters
+int Id, string Filter
+// Minimal apis automatically infer Id parameter is a route parameter if the route is "/byid/{id}" and Filter is a query parameter because is not in the route
+// this behaviour is part of Minimal apis, not SlimEndpoints.AOT
+
+
+// GET request
+public class GetProductsRequest
+{
+    [FromRoute]
+    public int Id { get; set; }
+    [FromQuery]
+    public string Filter { get; set; }
+}
+// Source generated delegate parameters
+[FromRoute] int Id, [FromQuery] string Filter
+
+
+
+// POST request with a route parameter
+public class UpdateWeatherForecastRequest
+{
+    [FromRoute]
+    public int Id { get; set; }
+    [FromBody]
+    [Required]
+    public UpdateWeatherForecastsRequest? Values { get; set; }
+}
+// This request will source generate the following delegate parameters
+[Microsoft.AspNetCore.Mvc.FromRouteAttribute]int Id, 
+[Microsoft.AspNetCore.Mvc.FromBodyAttribute] [System.ComponentModel.DataAnnotations.RequiredAttribute]Endpoints.UpdateWeatherForecastsRequest? Values
+
+
+
+// POST request without route parameters
+public class UpdateWeatherForecastsRequest
+{
+    [Required]
+    public string? Name { get; set; }
+}
+// Source generated delegate parameter
+[FromBody] UpdateWeatherForecastsRequest request
+
+```
+
 ## Configure route
 
 Routes can be configured from registration or from the handler itself.
@@ -125,7 +185,7 @@ Activate validation in Program.cs
 ```csharp
 app.MapGroup("/products")
     .AllowAnonymous()
-    // ValidateRequestEndpointFilter is a filter that validates the request, by default each handler is validated = true, you must override the method ValidateRequest in the handler
+    // ValidateRequestEndpointFilter is a filter that validates the request, by default each handler is Validate = OK, you must override the method ValidateRequest in the handler
     .AddEndpointFilter<ValidateRequestEndpointFilter>()
     .UseSlimEndpointsProducts();
 

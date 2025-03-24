@@ -1,5 +1,4 @@
-﻿
-namespace SlimEndpoints.Generator
+﻿namespace SlimEndpoints.AOT.Generator
 {
     internal class ValidatorWriter(List<Metadata> metadata) : AbstractWriter
     {

@@ -1,9 +1,9 @@
 {
   "solution": {
-    "path": "SlimEndpoints.sln",
+    "path": "SlimEndpoints.AOT.sln",
     "projects": [
-      "SlimEndpoints.Generator\\SlimEndpoints.Generator.csproj",
-      "SlimEndpoints\\SlimEndpoints.csproj",
+      "SlimEndpoints.AOT.Generator\\SlimEndpoints.AOT.Generator.csproj",
+      "SlimEndpoints.AOT\\SlimEndpoints.AOT.csproj",
     ]
   }
 }

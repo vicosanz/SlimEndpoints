@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using SlimEndpoints;
+using SlimEndpoints.AOT;
 
 namespace WebApplication1.Endpoints;
 
-[SlimEndpoint("", HttpMehotds.Get, "weatherforecast")]
+[SlimEndpoint("", [HttpMehotds.Get], "weatherforecast")]
 public class GetWeatherForecasts :
     SlimEndpointWithoutRequest<
         Results<

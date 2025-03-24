@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SlimEndpoints\SlimEndpoints.csproj" />
-    <ProjectReference Include="..\SlimEndpoints.Generator\SlimEndpoints.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\SlimEndpoints.AOT\SlimEndpoints.AOT.csproj" />
+    <ProjectReference Include="..\SlimEndpoints.AOT.Generator\SlimEndpoints.AOT.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

@@ -5,9 +5,9 @@ VisualStudioVersion = 17.13.35828.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{F3252895-3D95-46C4-B352-206AB1F990A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimEndpoints", "SlimEndpoints\SlimEndpoints.csproj", "{FB140DF6-3B9A-42A7-9A17-18F8837E5A6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimEndpoints.AOT", "SlimEndpoints.AOT\SlimEndpoints.AOT.csproj", "{FB140DF6-3B9A-42A7-9A17-18F8837E5A6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimEndpoints.Generator", "SlimEndpoints.Generator\SlimEndpoints.Generator.csproj", "{631BBBA1-8B40-4076-BE24-73C15FF5008B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimEndpoints.AOT.Generator", "SlimEndpoints.AOT.Generator\SlimEndpoints.AOT.Generator.csproj", "{631BBBA1-8B40-4076-BE24-73C15FF5008B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject

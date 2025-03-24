@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace SlimEndpoints.Generator
+namespace SlimEndpoints.AOT.Generator
 {
     internal class SlimEndpointsWriter(Metadata metadata) : AbstractWriter
     {
@@ -54,14 +54,14 @@ namespace SlimEndpoints.Generator
             bool isRequestFromBody = false;
             if (metadata.RequestTypeProperties != null)
             {
-                if (metadata.Verb.Equals(HttpMehotds.Post, StringComparison.InvariantCultureIgnoreCase)
-                    || metadata.Verb.Equals(HttpMehotds.Put, StringComparison.InvariantCultureIgnoreCase)
-                    || metadata.Verb.Equals(HttpMehotds.Patch, StringComparison.InvariantCultureIgnoreCase))
+                if (metadata.Verbs.Any(x => x.Equals(HttpMehotds.Post, StringComparison.InvariantCultureIgnoreCase)
+                    || x.Equals(HttpMehotds.Put, StringComparison.InvariantCultureIgnoreCase)
+                    || x.Equals(HttpMehotds.Patch, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     isRequestFromBody = true;
                     if (metadata.Route.Contains("{") ||
-                        metadata.RequestTypeProperties.Any(x => 
-                            x.Annotations.Contains(".FromRoute") || 
+                        metadata.RequestTypeProperties.Any(x =>
+                            x.Annotations.Contains(".FromRoute") ||
                             x.Annotations.Contains(".FromQuery") ||
                             x.Annotations.Contains(".FromHeader") ||
                             x.Annotations.Contains(".FromForm")
@@ -99,13 +99,13 @@ namespace SlimEndpoints.Generator
             WriteLine();
             WriteBrace($"public void UseSlimEndpoint(IEndpointRouteBuilder app)", () =>
             {
-                WriteLine($"var route = app.MapMethods(\"{metadata.Route}\", [\"{metadata.Verb}\"],");
+                WriteLine($"var route = app.MapMethods(\"{metadata.Route}\", [\"{string.Join(", ", metadata.Verbs)}\"],");
                 WriteLine($"    ([FromServices] {metadata.NameTyped}Implementation implementation, {propertiesWithTypeAndAnnotations}HttpContext httpContext, CancellationToken cancellationToken) =>");
                 WriteLine($"        implementation.HandleAsync({propertiesNames}httpContext, cancellationToken));");
                 WriteLine($"endpoint.Configure(route);");
             });
             string handle;
-            if (metadata.ResponseType == "SlimEndpoints.Unit")
+            if (metadata.ResponseType == "SlimEndpoints.AOT.Unit")
             {
                 handle = $"public async Task HandleAsync({propertiesWithType}HttpContext httpContext, CancellationToken cancellationToken)";
             }
@@ -115,7 +115,7 @@ namespace SlimEndpoints.Generator
             }
             WriteBrace(handle, () =>
             {
-                if (metadata.RequestType == "SlimEndpoints.Unit")
+                if (metadata.RequestType == "SlimEndpoints.AOT.Unit")
                 {
                     WriteLine($"return await endpoint.HandleAsync(httpContext, cancellationToken);");
                 }
@@ -130,9 +130,9 @@ namespace SlimEndpoints.Generator
             });
             WriteBrace($"public {metadata.RequestType} ParseRequestFromFilterContext(Microsoft.AspNetCore.Http.EndpointFilterInvocationContext context)", () =>
             {
-                if (metadata.RequestType == "SlimEndpoints.Unit")
+                if (metadata.RequestType == "SlimEndpoints.AOT.Unit")
                 {
-                    WriteLine("var request = new SlimEndpoints.Unit();");
+                    WriteLine("var request = new SlimEndpoints.AOT.Unit();");
                 }
                 else if (isRequestFromBody)
                 {

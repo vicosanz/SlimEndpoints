@@ -1,4 +1,4 @@
-﻿namespace SlimEndpoints.Generator
+﻿namespace SlimEndpoints.AOT.Generator
 {
     public static class HttpMehotds
     {

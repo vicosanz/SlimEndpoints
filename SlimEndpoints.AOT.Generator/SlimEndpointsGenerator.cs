@@ -7,12 +7,12 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace SlimEndpoints.Generator
+namespace SlimEndpoints.AOT.Generator
 {
     [Generator]
     public class SlimEndpointsGenerator : IIncrementalGenerator
     {
-        private static readonly string slimEndpointAttribute = "SlimEndpoints.SlimEndpointAttribute";
+        private static readonly string slimEndpointAttribute = "SlimEndpoints.AOT.SlimEndpointAttribute";
         private static readonly string iSlimEndpointType = "SlimEndpoint<";
         private static readonly string iSlimEndpointWithoutRequest = "SlimEndpointWithoutRequest<";
         private static readonly string iSlimEndpointWithoutResponse = "SlimEndpointWithoutResponse<";
@@ -86,8 +86,8 @@ namespace SlimEndpoints.Generator
                 string modifiers = type.GetModifiers();
 
                 TypeSyntax? requestTypeSyntax = null;
-                string requestType = "SlimEndpoints.Unit";
-                string responseType = "SlimEndpoints.Unit";
+                string requestType = "SlimEndpoints.AOT.Unit";
+                string responseType = "SlimEndpoints.AOT.Unit";
 
                 if (type.BaseList != null)
                 {
@@ -117,7 +117,7 @@ namespace SlimEndpoints.Generator
                     }
                 }
                 List<TypeProperty>? requestTypeSymbolProperties = null;
-                if (requestType != "SlimEndpoints.Unit")
+                if (requestType != "SlimEndpoints.AOT.Unit")
                 {
                     var requestTypeSymbol = semanticModel.GetTypeInfo(requestTypeSyntax!).Type;
                     if (requestTypeSymbol is null)
@@ -129,7 +129,7 @@ namespace SlimEndpoints.Generator
                 }
 
                 string route = "";
-                string verb = HttpMehotds.Get;
+                string[] verbs = [HttpMehotds.Get];
                 string group = "";
 
                 foreach (var attribute in typeSymbol.GetAttributes())
@@ -141,7 +141,7 @@ namespace SlimEndpoints.Generator
                             route = attribute.ConstructorArguments.First().Value!.ToString();
                             if (attribute.ConstructorArguments.Count() > 1)
                             {
-                                verb = attribute.ConstructorArguments[1].Value!.ToString();
+                                verbs = attribute.ConstructorArguments[1].Values.Select(x => x.Value!.ToString()).ToArray();
                             }
                             if (attribute.ConstructorArguments.Count() > 2)
                             {
@@ -162,7 +162,7 @@ namespace SlimEndpoints.Generator
                                         responseType,
                                         requestTypeSymbolProperties,
                                         route,
-                                        verb,
+                                        verbs,
                                         group));
             }
             return slimEndpoints;

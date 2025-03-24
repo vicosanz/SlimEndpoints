@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <LangVersion>Latest</LangVersion>
-    <Description>Implementation of SlimEndpoints.</Description>
+    <Description>This library create a wrapper for minimal apis but implementing REPR (Resource, Endpoint, Processor, Response) pattern. Compatible 100% with AOT</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/vicosanz/SlimEndpoints</PackageProjectUrl>
     <RepositoryUrl>https://github.com/vicosanz/SlimEndpoints</RepositoryUrl>
@@ -18,6 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SlimEndpoints.Generator\SlimEndpoints.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\SlimEndpoints.Generator\SlimEndpoints.AOT.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

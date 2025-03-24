@@ -6,7 +6,7 @@
     <ImplicitUsings>true</ImplicitUsings>
     <LangVersion>Latest</LangVersion>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <Description>Implementation of SlimEndpoints. Source Generator</Description>
+    <Description>This library create a wrapper for minimal apis but implementing REPR (Resource, Endpoint, Processor, Response) pattern. Compatible 100% with AOT</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/vicosanz/SlimEndpoints</PackageProjectUrl>
     <RepositoryUrl>https://github.com/vicosanz/SlimEndpoints</RepositoryUrl>

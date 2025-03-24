@@ -37,7 +37,7 @@ internal class Program
 
         app.MapGroup("/products")
             .AllowAnonymous()
-            .AddEndpointFilter<ValidateRequestEndpointFilter1>()
+            .AddEndpointFilter<ValidateRequestEndpointFilter>()
             .UseSlimEndpointsProducts();
         
         app.UseExceptionHandler(exceptionapp =>

@@ -1,6 +1,9 @@
-﻿namespace SlimEndpoints.Generator
+﻿
+using Microsoft.CodeAnalysis;
+
+namespace SlimEndpoints.AOT.Generator
 {
-    internal class UseSlimEndpointsWriter(string group, List<Metadata> metadata) : AbstractWriter
+    internal class AddSlimEndpointsWriter(List<Metadata> metadata) : AbstractWriter
     {
         public string GetCode()
         {
@@ -24,25 +27,24 @@
             WriteLine("#nullable enable");
             WriteLine();
 
-            if (!string.IsNullOrEmpty(metadata[0].Namespace))
-            {
-                WriteLine($"namespace Microsoft.Extensions.DependencyInjection;");
-            }
+            WriteLine($"namespace Microsoft.Extensions.DependencyInjection;");
             WriteLine();
             WriteAddSlimEndpoints();
         }
 
         private void WriteAddSlimEndpoints()
         {
-            WriteBrace($"public static class UseSlimEndpoints{group}Extensions", () =>
+            WriteBrace($"public static class AddSlimEndpointsExtensions", () =>
             {
-                WriteBrace($"public static void UseSlimEndpoints{group}(this IEndpointRouteBuilder app)", () =>
+                WriteBrace($"public static IServiceCollection AddSlimEndpoints(this IServiceCollection services)", () =>
                 {
                     foreach (var data in metadata)
                     {
-                        WriteLine($"app.ServiceProvider.GetRequiredService<{data.Name}Implementation>().UseSlimEndpoint(app);");
+                        WriteLine($"services.AddTransient<{data.Name}>();");
+                        WriteLine($"services.AddTransient<{data.Name}Implementation>();");
                         WriteLine();
                     }
+                    WriteLine("return services;");
                 });
             });
             WriteLine();

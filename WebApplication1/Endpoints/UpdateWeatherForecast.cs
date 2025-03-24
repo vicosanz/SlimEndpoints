@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using SlimEndpoints;
+using SlimEndpoints.AOT;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Endpoints;
@@ -14,7 +14,7 @@ public class UpdateWeatherForecastRequest
     public UpdateWeatherForecastsRequest? Values { get; set; }
 }
 
-[SlimEndpoint("/update/{Id}", HttpMehotds.Post, "weatherforecast")]
+[SlimEndpoint("/update/{Id}", [HttpMehotds.Post], "weatherforecast")]
 public class UpdateWeatherForecast :
     SlimEndpoint<UpdateWeatherForecastRequest,
         Results<

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SlimEndpoints.Generator
+namespace SlimEndpoints.AOT.Generator
 {
     public static class DiagnosticDescriptors
     {

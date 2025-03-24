@@ -33,7 +33,7 @@ Content-Type: application/json
 }
 
 ###
-GET {{WebApplication1_HostAddress}}/products/products
+GET {{WebApplication1_HostAddress}}/products/all
 Accept: application/json
 
 ###

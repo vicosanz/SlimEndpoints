@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 
-namespace SlimEndpoints.Generator
+namespace SlimEndpoints.AOT.Generator
 {
     /// <param name="Namespace"> The namespace found in the base struct </param>
     /// <param name="Usings"> Usings of the base struct </param>
@@ -18,7 +18,7 @@ namespace SlimEndpoints.Generator
     /// <param name="AdditionalConverters"> Array of additional converters </param>
     public record Metadata(string Namespace, IReadOnlyList<string> Usings,
         bool AllowNulls, string Name, string NameTyped, string FullName, string Modifiers,
-        string RequestType, string ResponseType, List<TypeProperty>? RequestTypeProperties, string Route, string Verb, string Group)
+        string RequestType, string ResponseType, List<TypeProperty>? RequestTypeProperties, string Route, string[] Verbs, string Group)
     {
         /// <summary>
         /// The namespace found in the base struct
@@ -72,7 +72,7 @@ namespace SlimEndpoints.Generator
 
         internal bool IsBaseInnerTypePrimitiveOrId() => GeneratorHelpers.IsTypePrimitiveOrId(GetBaseInnerType());
         public string Route { get; internal set; } = Route;
-        public string Verb{ get; internal set; } = Verb;
+        public string[] Verbs{ get; internal set; } = Verbs;
         public string Group { get; internal set; } = Group;
     }
 

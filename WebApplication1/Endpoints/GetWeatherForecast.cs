@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using SlimEndpoints;
+using SlimEndpoints.AOT;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Endpoints;
@@ -17,7 +17,7 @@ public class GetWeatherForecastRequest
     public string? contentType { get; set; }
 }
 
-[SlimEndpoint("/{Id}", HttpMehotds.Get, "weatherforecast")]
+[SlimEndpoint("/{Id}", [HttpMehotds.Get], "weatherforecast")]
 public class GetWeatherForecast(IMemoryCache memoryCache) :
     SlimEndpoint<GetWeatherForecastRequest,
         Results<

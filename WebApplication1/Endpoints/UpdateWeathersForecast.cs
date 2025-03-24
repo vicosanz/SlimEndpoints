@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using SlimEndpoints;
+using SlimEndpoints.AOT;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Endpoints;
@@ -21,7 +21,7 @@ public class UpdateWeatherForecastsRequestValidator : AbstractValidator<UpdateWe
     }
 }
 
-[SlimEndpoint("/update", HttpMehotds.Post, "weatherforecast")]
+[SlimEndpoint("/update", [HttpMehotds.Post], "weatherforecast")]
 public partial class UpdateWeatherForecasts :
     SlimEndpoint<UpdateWeatherForecastsRequest,
         Results<

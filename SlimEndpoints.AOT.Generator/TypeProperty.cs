@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace SlimEndpoints.Generator
+namespace SlimEndpoints.AOT.Generator
 {
     public record TypeProperty(ITypeSymbol Type, string Name, string Annotations)
     {
