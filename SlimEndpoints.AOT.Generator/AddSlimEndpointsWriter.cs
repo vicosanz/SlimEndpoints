@@ -40,8 +40,8 @@ namespace SlimEndpoints.AOT.Generator
                 {
                     foreach (var data in metadata)
                     {
-                        WriteLine($"services.AddTransient<{data.Name}>();");
-                        WriteLine($"services.AddTransient<{data.Name}Implementation>();");
+                        WriteLine($"services.AddScoped<{data.Name}>();");
+                        WriteLine($"services.AddScoped<{data.Name}Implementation>();");
                         WriteLine();
                     }
                     WriteLine("return services;");

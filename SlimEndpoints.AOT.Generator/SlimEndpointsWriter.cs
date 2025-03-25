@@ -95,7 +95,7 @@ namespace SlimEndpoints.AOT.Generator
                 }
                 else
                 {
-                    propertiesWithTypeAndAnnotations = $"[FromBody] {metadata.RequestType} request, ";
+                    propertiesWithTypeAndAnnotations = $"[Microsoft.AspNetCore.Mvc.FromBody] {metadata.RequestType} request, ";
                     propertiesWithType = $"{metadata.RequestType} request, ";
                     propertiesNames = "request, ";
                     propertiesParse = "";

@@ -38,11 +38,14 @@
             {
                 WriteBrace($"public static void UseSlimEndpoints{group}(this IEndpointRouteBuilder app)", () =>
                 {
-                    foreach (var data in metadata)
+                    WriteBrace("using (var scope = app.ServiceProvider.CreateScope())", () =>
                     {
-                        WriteLine($"app.ServiceProvider.GetRequiredService<{data.Name}Implementation>().UseSlimEndpoint(app);");
-                        WriteLine();
-                    }
+                        foreach (var data in metadata)
+                        {
+                            WriteLine($"scope.ServiceProvider.GetRequiredService<{data.Name}Implementation>().UseSlimEndpoint(app);");
+                            WriteLine();
+                        }
+                    });
                 });
             });
             WriteLine();

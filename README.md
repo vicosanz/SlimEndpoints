@@ -13,6 +13,16 @@ SlimEndpoints.AOT.Generator [![NuGet Badge](https://buildstats.info/nuget/SlimEn
 If you want to reward my effort, :coffee: https://www.paypal.com/paypalme/vicosanzdev?locale.x=es_XC
 
 
+## Instalation
+
+Add SlimEndpoints.AOT and SlimEndpoints.AOT.Generator to your project.
+```bash
+dotnet add package SlimEndpoints.AOT
+dotnet add package SlimEndpoints.AOT.Generator
+``` 
+
+## Usage
+
 Minimal apis generally looks like this:
 ```csharp
 // GET endpoint: Retrieve all products
