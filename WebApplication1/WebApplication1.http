@@ -1,5 +1,10 @@
 @WebApplication1_HostAddress = http://localhost:5202
 
+GET {{WebApplication1_HostAddress}}/weatherforecast/stream/50
+Accept: application/octet-stream
+
+
+###
 GET {{WebApplication1_HostAddress}}/weatherforecast/
 Accept: application/json
 
@@ -47,3 +52,47 @@ Content-Type: application/json
 {
   "Name": "Laptop"
 }
+
+###
+POST {{WebApplication1_HostAddress}}/products/upload/1 HTTP/1.1
+Content-Type: multipart/form-data; boundary=----MyBoundary
+
+------MyBoundary
+Content-Disposition: form-data; name="Datax"
+Content-Type: application/json
+
+{
+  "name": "Sample File",
+  "description": "This is a description of the file"
+}
+------MyBoundary
+Content-Disposition: form-data; name="file"; filename="example.txt"
+Content-Type: text/plain
+
+< insert file content here >
+------MyBoundary--
+
+###
+
+GET {{WebApplication1_HostAddress}}/generate-antiforgery-token
+Accept: application/json
+
+
+###
+POST {{WebApplication1_HostAddress}}/products/uploadstd/1 HTTP/1.1
+Content-Type: multipart/form-data; boundary=----MyBoundary
+
+------MyBoundary
+Content-Disposition: form-data; name="__RequestVerificationToken"
+
+CfDJ8LiEdcm1FUNNsNEQ2yavrz2tfMHyWroINRshipBvcRVO0CBKdjbbDXnt--xU-nQW_1_Q5DbP8Nx7BN1e_3lfyy33YYmktdzsYKz8N0PaKYCq7Svht_lhv_tImEPw9InCu0ci1t31-wPPIjdJoOCgciQ
+------MyBoundary
+Content-Disposition: form-data; name="Name"
+
+The one
+------MyBoundary
+Content-Disposition: form-data; name="Photo1"; filename="example.txt"
+Content-Type: text/plain
+
+< insert file content here >
+------MyBoundary--

@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
-using WebApplication1;
 
 internal class Program
 {
@@ -17,11 +17,12 @@ internal class Program
         builder.Services.AddMemoryCache();
 
         builder.Services.AddSlimEndpoints();
+        builder.Services.AddAntiforgery();
         builder.Services.ConfigureHttpJsonOptions(options =>
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, SlimJsonContext.Default);
         });
-        builder.Services.Configure<RouteOptions>(options => 
+        builder.Services.Configure<RouteOptions>(options =>
         {
             options.SetParameterPolicy<RegexInlineRouteConstraint>("regex");
         });
@@ -36,6 +37,8 @@ internal class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAntiforgery();
+        
         app.MapGroup("/weatherforecast")
             .AddEndpointFilter<LogginFilter>()
             .AddEndpointFilter<ValidateRequestEndpointFilter>()
@@ -46,7 +49,16 @@ internal class Program
             .AddEndpointFilter<LogginFilter>()
             .AddEndpointFilter<ValidateRequestEndpointFilter>()
             .UseSlimEndpointsProducts();
-        
+
+        app.MapGet("/generate-antiforgery-token", (IAntiforgery antiforgery, HttpContext httpContext) =>
+        {
+            // Generate the antiforgery tokens (cookie and request token)
+            var tokens = antiforgery.GetAndStoreTokens(httpContext);
+
+            var xsrfToken = tokens.RequestToken!;
+            return TypedResults.Content($"{tokens.FormFieldName} {xsrfToken}", "text/plain");
+        });
+
         app.UseExceptionHandler(exceptionapp =>
             exceptionapp.Run(async context =>
             {
@@ -55,8 +67,7 @@ internal class Program
                              .ExecuteAsync(context);
             })
         );
-        
 
         app.Run();
-    }
+    }    
 }

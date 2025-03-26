@@ -9,6 +9,7 @@ using WebApplication1.Endpoints.Products;
 [JsonSerializable(typeof(WebApplication1.Endpoints.UpdateWeatherForecastRequest))]
 [JsonSerializable(typeof(Product[]))]
 [JsonSerializable(typeof(WebApplication1.Endpoints.Products.PostSlug.SlugData))]
+[JsonSerializable(typeof(WebApplication1.Endpoints.Products.Upload.UploadData))]
 public partial class SlimJsonContext : JsonSerializerContext
 {
 }

@@ -56,5 +56,17 @@ namespace SlimEndpoints.AOT.Generator
             WriteLine(text);
             WriteNested("{", "}", action);
         }
+
+        protected void WriteIdented(string? text, Action action)
+        {
+            WriteLine(text);
+            WriteNested("", "", action);
+        }
+
+        protected void WriteBracedArrowFunction(string? text, Action action)
+        {
+            WriteLine(text);
+            WriteNested("{", "});", action);
+        }
     }
 }
