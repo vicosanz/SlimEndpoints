@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
+using Scalar.AspNetCore;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateSlimBuilder(args);
-
 
         // Add services to the container.
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -22,6 +22,7 @@ internal class Program
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, SlimJsonContext.Default);
         });
+        builder.Services.AddSingleton(SlimJsonContext.Default);
         builder.Services.Configure<RouteOptions>(options =>
         {
             options.SetParameterPolicy<RegexInlineRouteConstraint>("regex");
@@ -33,24 +34,29 @@ internal class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.MapScalarApiReference();
         }
 
         app.UseHttpsRedirection();
 
         app.UseAntiforgery();
-        
-        app.MapGroup("/weatherforecast")
+
+        //Set defaults globally
+        var rootGroup = app.MapGroup("")
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        rootGroup.MapGroup("/weatherforecast")
             .AddEndpointFilter<LogginFilter>()
             .AddEndpointFilter<ValidateRequestEndpointFilter>()
             .UseSlimEndpointsweatherforecast();
 
-        app.MapGroup("/products")
+        rootGroup.MapGroup("/products")
             .AllowAnonymous()
             .AddEndpointFilter<LogginFilter>()
             .AddEndpointFilter<ValidateRequestEndpointFilter>()
             .UseSlimEndpointsProducts();
 
-        app.MapGet("/generate-antiforgery-token", (IAntiforgery antiforgery, HttpContext httpContext) =>
+        rootGroup.MapGet("/generate-antiforgery-token", (IAntiforgery antiforgery, HttpContext httpContext) =>
         {
             // Generate the antiforgery tokens (cookie and request token)
             var tokens = antiforgery.GetAndStoreTokens(httpContext);

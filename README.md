@@ -18,7 +18,6 @@ If you want to reward my effort, :coffee: https://www.paypal.com/paypalme/vicosa
 Add SlimEndpoints.AOT and SlimEndpoints.AOT.Generator to your project.
 ```bash
 dotnet add package SlimEndpoints.AOT
-dotnet add package SlimEndpoints.AOT.Generator
 ``` 
 
 ## Usage
@@ -99,10 +98,19 @@ app.MapGroup("/products")
 
 ## Parameters declaration
 
-As you can see in the example, the request is a class with the Route parameter as a property. The source generator rewrite each property into a delegate compatible with minimal apis included all of his decorators.
-In the case of POST, PUT, PATCH and if route no declare parameters like "/UpdateProduct/{id}" asume whole request as a [FromBody] parameter.
-You can override parameter behaviour following minimal apis parameter binding, please see https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/parameter-binding?view=aspnetcore-9.0
-If you need a service parameter inject directly in the handler, DO NOT put the service as a property into the request with [FromService]
+As you can see in the example, the request is a class with the Route parameter as a property. 
+The source generator rewrite each property into a delegate compatible with minimal apis included all of his decorators.
+In the case of POST, PUT, PATCH and if route no declare parameters like "/UpdateProduct/{id}" 
+asume whole request as a [FromBody] parameter.
+You can override parameter behaviour following minimal apis parameter binding, 
+please see https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/parameter-binding?view=aspnetcore-9.0
+If you need a service parameter inject directly in the handler, 
+TRY TO NOT put the service as a property into the request with [FromService]
+If you need custom bindings, follow the guide directly from Minimal apis
+https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-9.0#custom-binding
+An example code of this can be found in the repository.
+https://github.com/vicosanz/SlimEndpoints/blob/master/WebApplication1/Endpoints/Products/Upload/PostUploadMultipartFormDataNonStandard.cs
+
 See the following examples:
 
 ```csharp

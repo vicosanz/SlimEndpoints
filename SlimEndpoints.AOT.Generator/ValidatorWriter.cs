@@ -10,24 +10,21 @@
 
         private void WriteFile()
         {
-            List<string> usings = ["using System;", "using Microsoft.AspNetCore.Http.HttpResults;"];
+            List<string> usings = ["System", "Microsoft.AspNetCore.Http.HttpResults"];
             foreach (var data in metadata)
             {
-                usings.Add($"using {data.Namespace};");
+                usings.Add(data.Namespace);
             }
 
             foreach (var @using in usings.Distinct())
             {
-                WriteLine(@using);
+                WriteLine($"using {@using};");
             }
             WriteLine();
             WriteLine("#nullable enable");
             WriteLine();
 
-            if (!string.IsNullOrEmpty(metadata[0].Namespace))
-            {
-                WriteLine($"namespace Microsoft.Extensions.DependencyInjection;");
-            }
+            WriteLine($"namespace Microsoft.Extensions.DependencyInjection;");
             WriteLine();
             WriteValidator();
         }

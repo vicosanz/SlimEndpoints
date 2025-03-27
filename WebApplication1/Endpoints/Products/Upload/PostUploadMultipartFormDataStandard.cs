@@ -4,7 +4,7 @@ using SlimEndpoints.AOT;
 
 namespace WebApplication1.Endpoints.Products.Upload
 {
-    public class PostUploadStdRequest
+    public record struct PostUploadStdRequest
     {
         public int Id { get; set; }
         [FromForm]
@@ -17,15 +17,15 @@ namespace WebApplication1.Endpoints.Products.Upload
     }
 
     [SlimEndpoint("/uploadStd/{id:int}", [HttpMehotds.Post], group: "Products")]
-    public class PostUploadMultipartFormDataStandard(IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions> jsonOptions) : SlimEndpoint<PostUploadStdRequest, IResult>
+    public class PostUploadMultipartFormDataStandard : SlimEndpoint<PostUploadStdRequest, IResult>
     {
         public override void Configure(RouteHandlerBuilder builder)
         {
             //builder.DisableAntiforgery();
         }
-        public override async Task<IResult> HandleAsync(HttpContext httpContext, PostUploadStdRequest request, CancellationToken cancellationToken)
+        public override Task<IResult> HandleAsync(HttpContext httpContext, PostUploadStdRequest request, CancellationToken cancellationToken)
         {
-            return Results.Ok();
+            return Task.FromResult(Results.Ok());
         }
     }
 }

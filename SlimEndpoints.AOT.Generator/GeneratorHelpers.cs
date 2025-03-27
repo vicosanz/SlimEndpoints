@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SlimEndpoints.AOT.Generator
 {
@@ -71,7 +72,7 @@ namespace SlimEndpoints.AOT.Generator
             {
                 if (parent is CompilationUnitSyntax compilationUnit)
                 {
-                    return compilationUnit.Usings.ToList().ConvertAll(x => x.ToFullString());
+                    return compilationUnit.Usings.ToList().ConvertAll(x => Regex.Replace(x.ToFullString(), @"using\s+|;|\r|\n", ""));
                 }
                 parent = parent.Parent;
             }

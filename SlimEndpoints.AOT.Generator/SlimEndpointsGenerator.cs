@@ -45,13 +45,13 @@ namespace SlimEndpoints.AOT.Generator
             if (groups.Any())
             {
                 var generatorAddSlimEndpoints = new AddSlimEndpointsWriter(slimEndpoints);
-                context.AddSource($"{slimEndpoints[0].Namespace}.AddSlimEndpoints.g.cs",
+                context.AddSource($"{compilation.Assembly.MetadataName}.AddSlimEndpoints.g.cs",
                     SourceText.From(generatorAddSlimEndpoints.GetCode(), Encoding.UTF8));
 
                 foreach (var group in groups)
                 {
                     var generatorGroup = new UseSlimEndpointsWriter(group.Key, [.. group]);
-                    context.AddSource($"{slimEndpoints[0].Namespace}.UseSlimEndpoints.{group.Key}.g.cs",
+                    context.AddSource($"{compilation.Assembly.MetadataName}.UseSlimEndpoints.{group.Key}.g.cs",
                         SourceText.From(generatorGroup.GetCode(), Encoding.UTF8));
 
                     foreach (var slimEndpoint in group)
@@ -63,7 +63,7 @@ namespace SlimEndpoints.AOT.Generator
                 }
 
                 var generatorValidator = new ValidatorWriter(slimEndpoints);
-                context.AddSource($"{slimEndpoints[0].Namespace}.Validators.g.cs",
+                context.AddSource($"{compilation.Assembly.MetadataName}.Validators.g.cs",
                     SourceText.From(generatorValidator.GetCode(), Encoding.UTF8));
             }
         }
@@ -71,7 +71,6 @@ namespace SlimEndpoints.AOT.Generator
         protected static List<Metadata> GetSlimpEndpoints(Compilation compilation,
             IEnumerable<TypeDeclarationSyntax> types, SourceProductionContext context)
         {
-            
             var slimEndpoints = new List<Metadata>();
             foreach (var type in types)
             {
@@ -88,6 +87,7 @@ namespace SlimEndpoints.AOT.Generator
                 TypeSyntax? requestTypeSyntax = null;
                 string requestType = "SlimEndpoints.AOT.Unit";
                 string responseType = "SlimEndpoints.AOT.Unit";
+                string? requestTypeKind = null;
                 bool isRequestTypePositionRecord = false;
 
                 if (type.BaseList != null)
@@ -133,6 +133,19 @@ namespace SlimEndpoints.AOT.Generator
                         );
                         continue;
                     }
+                    requestTypeKind = "class";
+                    if (requestTypeSymbol.IsRecord)
+                    {
+                        requestTypeKind = "record class";
+                        if (requestTypeSymbol.TypeKind == TypeKind.Struct)
+                        {
+                            requestTypeKind = "record struct";
+                        }
+                        else
+                        {
+                            requestTypeKind = "struct";
+                        }
+                    }
                     isRequestTypePositionRecord = requestTypeSymbol.IsRecord && ((INamedTypeSymbol)requestTypeSymbol).Constructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length > 0);
                     requestTypeSymbolProperties = [.. 
                         requestTypeSymbol.GetMembers().OfType<IPropertySymbol>()
@@ -173,6 +186,7 @@ namespace SlimEndpoints.AOT.Generator
                                         modifiers,
                                         requestType,
                                         responseType,
+                                        requestTypeKind,
                                         isRequestTypePositionRecord,
                                         requestTypeSymbolProperties,
                                         route,

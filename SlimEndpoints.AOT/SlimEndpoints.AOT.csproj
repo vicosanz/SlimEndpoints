@@ -9,7 +9,7 @@
     <RepositoryUrl>https://github.com/vicosanz/SlimEndpoints</RepositoryUrl>
     <Authors>Victor Sanchez</Authors>
     <Company>Infoware Soluciones</Company>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <Nullable>enable</Nullable>
     <PackageReleaseNotes>Implementation of SlimEndpoints.</PackageReleaseNotes>
   </PropertyGroup>
@@ -19,6 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SlimEndpoints.Generator\SlimEndpoints.AOT.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\SlimEndpoints.AOT.Generator\SlimEndpoints.AOT.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

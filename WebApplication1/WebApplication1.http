@@ -73,6 +73,25 @@ Content-Type: text/plain
 ------MyBoundary--
 
 ###
+POST {{WebApplication1_HostAddress}}/products/uploadbinding/1 HTTP/1.1
+Content-Type: multipart/form-data; boundary=----MyBoundary
+
+------MyBoundary
+Content-Disposition: form-data; name="Datax"
+Content-Type: application/json
+
+{
+  "name": "Sample File",
+  "description": "This is a description of the file"
+}
+------MyBoundary
+Content-Disposition: form-data; name="file"; filename="example.txt"
+Content-Type: text/plain
+
+< insert file content here >
+------MyBoundary--
+
+###
 
 GET {{WebApplication1_HostAddress}}/generate-antiforgery-token
 Accept: application/json

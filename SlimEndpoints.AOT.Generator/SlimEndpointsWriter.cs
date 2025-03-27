@@ -12,11 +12,11 @@ namespace SlimEndpoints.AOT.Generator
 
         private void WriteFile()
         {
-            List<string> usings = ["using System;", $"using Microsoft.AspNetCore.Mvc;"];
+            List<string> usings = ["System", "Microsoft.AspNetCore.Mvc"];
             usings = [.. usings, .. metadata.Usings];
             foreach (var @using in usings.Distinct())
             {
-                WriteLine(@using);
+                WriteLine($"using {@using};");
             }
             WriteLine();
             WriteLine("#nullable enable");
@@ -52,9 +52,14 @@ namespace SlimEndpoints.AOT.Generator
             string propertiesParse = "";
             string propertiesFromContext = "";
             bool isRequestFromBody = false;
+            bool isRequestAsParameter = false;
             if (metadata.RequestTypeProperties != null)
             {
-                if (metadata.Verbs.Any(x => x.Equals(HttpMehotds.Post, StringComparison.InvariantCultureIgnoreCase)
+                if (metadata.RequestTypeKind == "struct" || metadata.RequestTypeKind == "record" || metadata.RequestTypeKind == "record struct")
+                {
+                    isRequestAsParameter = true;
+                }
+                else if (metadata.Verbs.Any(x => x.Equals(HttpMehotds.Post, StringComparison.InvariantCultureIgnoreCase)
                     || x.Equals(HttpMehotds.Put, StringComparison.InvariantCultureIgnoreCase)
                     || x.Equals(HttpMehotds.Patch, StringComparison.InvariantCultureIgnoreCase)))
                 {
@@ -71,7 +76,8 @@ namespace SlimEndpoints.AOT.Generator
                         isRequestFromBody = false;
                     }
                 }
-                if (!isRequestFromBody)
+
+                if (!isRequestFromBody && !isRequestAsParameter)
                 {
                     propertiesWithTypeAndAnnotations = string.Join(", ", metadata.RequestTypeProperties.Select(x => $"{x.Annotations}{x.Type} {x.Name}")) + ", ";
                     propertiesWithType = string.Join(", ", metadata.RequestTypeProperties.Select(x => $"{x.Type} {x.Name}")) + ", ";
@@ -95,7 +101,12 @@ namespace SlimEndpoints.AOT.Generator
                 }
                 else
                 {
-                    propertiesWithTypeAndAnnotations = $"[Microsoft.AspNetCore.Mvc.FromBody] {metadata.RequestType} request, ";
+                    string attribute = isRequestFromBody 
+                        ? "[Microsoft.AspNetCore.Mvc.FromBody]" : 
+                            isRequestAsParameter
+                                ? "[Microsoft.AspNetCore.Http.AsParameters]"
+                                : "";
+                    propertiesWithTypeAndAnnotations = $"{attribute} {metadata.RequestType} request, ";
                     propertiesWithType = $"{metadata.RequestType} request, ";
                     propertiesNames = "request, ";
                     propertiesParse = "";
@@ -151,7 +162,7 @@ namespace SlimEndpoints.AOT.Generator
                 {
                     WriteLine("var request = new SlimEndpoints.AOT.Unit();");
                 }
-                else if (isRequestFromBody)
+                else if (isRequestFromBody || isRequestAsParameter)
                 {
                     WriteLine($"var request = {propertiesFromContext};");
                 }

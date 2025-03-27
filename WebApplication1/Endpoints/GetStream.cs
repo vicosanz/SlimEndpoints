@@ -24,7 +24,7 @@ public class GetStream : SlimEndpointWithoutResponse<GetStreamRequest>
 }
 
 
-public class GetStreamRequest
+public record struct GetStreamRequest
 {
     public int Id { get; set; }
 }

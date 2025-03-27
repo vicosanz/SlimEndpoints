@@ -13,15 +13,15 @@ namespace SlimEndpoints.AOT.Generator
 
         private void WriteFile()
         {
-            List<string> usings = ["using System;"];
+            List<string> usings = ["System"];
             foreach (var data in metadata)
             {
-                usings.Add($"using {data.Namespace};");
+                usings.Add(data.Namespace);
             }
 
             foreach (var @using in usings.Distinct())
             {
-                WriteLine(@using);
+                WriteLine($"using {@using};");
             }
             WriteLine();
             WriteLine("#nullable enable");
