@@ -37,55 +37,7 @@ public record UploadData(string name = "", string description = "")
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
     public static async ValueTask<UploadData?> BindAsync(HttpContext httpContext,
-                                              ParameterInfo parameter)
-    {
-        //ENABLE BUFFERING FOR MULTIPLE READS
-        httpContext.Request.EnableBuffering();
-
-        UploadData? result = null;
-        if (!httpContext.TryGetMediaTypeHeaderValue(ContentTypes.MultipartFormData, out MediaTypeHeaderValue? contentType))
-        {
-            throw new ArgumentException("Incorrect mime-type");
-        }
-
-        if (!contentType!.TryGetBoundary(256, out string? boundary))
-        {
-            throw new Exception("Incorrect boundary");
-        }
-
-        //RESET POSITION TO START, DONT FORGET TO RESET POSITION TO THE NEXT MIDDLEWARE
-        httpContext.Request.Body.Position = 0;
-        //RESET POSITION TO START, DONT FORGET TO RESET POSITION TO THE NEXT MIDDLEWARE
-
-        try
-        {
-            var multipartReader = new MultipartReader(boundary!, httpContext.Request.Body);
-            while (await multipartReader.ReadNextSectionAsync() is { } section)
-            {
-                var contentDisposition = section.GetContentDispositionHeader();
-                if (contentDisposition!.Name == parameter.Name)
-                {
-                    if (section.ContentType != ContentTypes.ApplicationJson)
-                    {
-                        throw new ArgumentException($"Invalid content type {section.ContentType} in section {contentDisposition!.Name}");
-                    }
-                    var jsonOptions = httpContext.RequestServices.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>();
-                    result = await JsonSerializer.DeserializeAsync<UploadData>(section.Body, jsonOptions.Value.SerializerOptions);
-                }
-            }
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-        finally
-        {
-            //RESET POSITION TO START, DONT FORGET TO RESET POSITION TO THE NEXT MIDDLEWARE
-            httpContext.Request.Body.Position = 0;
-            //RESET POSITION TO START, DONT FORGET TO RESET POSITION TO THE NEXT MIDDLEWARE
-        }
-        return result;
-    }
+        ParameterInfo parameter) => await httpContext.GetMultipartFormJsonSection<UploadData>(parameter);
 }
 
 public record UploadDataReturn(string name = "", string description = "", string fileText = "");
@@ -147,6 +99,10 @@ public class PostUploadMultipartFormDataNonStandardBinding1 :
     public override void Configure(RouteHandlerBuilder builder)
     {
         builder.DisableAntiforgery();
+    }
+    public override IResult Validate(PostUploadBindingRequest request)
+    {
+        return base.Validate(request);
     }
     public override async Task<IResult> HandleAsync(HttpContext httpContext, PostUploadBindingRequest request, CancellationToken cancellationToken)
     {

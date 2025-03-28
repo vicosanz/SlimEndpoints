@@ -43,18 +43,13 @@ internal class Program
 
         //Set defaults globally
         var rootGroup = app.MapGroup("")
+            .AddEndpointFilter<LogginFilter>()
+            .AddEndpointFilter<ValidateRequestEndpointFilter>()
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        rootGroup.MapGroup("/weatherforecast")
-            .AddEndpointFilter<LogginFilter>()
-            .AddEndpointFilter<ValidateRequestEndpointFilter>()
-            .UseSlimEndpointsweatherforecast();
-
-        rootGroup.MapGroup("/products")
-            .AllowAnonymous()
-            .AddEndpointFilter<LogginFilter>()
-            .AddEndpointFilter<ValidateRequestEndpointFilter>()
-            .UseSlimEndpointsProducts();
+        rootGroup
+            .UseSlimEndpointsweatherforecast("/weatherforecast")
+            .UseSlimEndpointsProducts("/products");
 
         rootGroup.MapGet("/generate-antiforgery-token", (IAntiforgery antiforgery, HttpContext httpContext) =>
         {

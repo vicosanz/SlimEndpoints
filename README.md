@@ -18,6 +18,7 @@ If you want to reward my effort, :coffee: https://www.paypal.com/paypalme/vicosa
 Add SlimEndpoints.AOT and SlimEndpoints.AOT.Generator to your project.
 ```bash
 dotnet add package SlimEndpoints.AOT
+dotnet add package SlimEndpoints.AOT.Generator
 ``` 
 
 ## Usage
@@ -195,6 +196,60 @@ public class GetProductByIdHandler : SlimEndpoint<GetProductsRequest, Product>
         return Task.FromResult(new Product { Name = "Product 1", Price = 100 });
     }
 }
+```
+
+## Custom Bindings
+
+Use BindAsync when you need additional bindings.
+Please see https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/parameter-binding?view=aspnetcore-9.0#custom-binding
+
+Example
+
+```csharp
+//Binder to get data from Json Section of a multipart form-data
+public record UploadData(string name, string description)
+{
+    public static async ValueTask<UploadData?> BindAsync(HttpContext httpContext,
+        ParameterInfo parameter) => await httpContext.GetMultipartFormJsonSection<UploadData>(parameter);
+}
+
+
+//Usage of custom binder
+public class PostUploadBindingRequest
+{
+    public int Id { get; set; }
+    public UploadData Data { get; set; }
+    public IFormFile File { get; set; }
+}
+
+```
+
+
+Example using ComplexType library:
+
+```bash
+dotnet add package ComplexType
+``` 
+
+```csharp
+[ComplexType]
+public readonly partial record struct UserIdClaim
+{
+    public static ValueTask<UserIdClaim?> BindAsync(HttpContext httpContext)
+    {
+        var claimValue = httpContext.User?.Claims?.FirstOrDefault(c => c.Type == ClaimNames.UserIdClaimType)?.Value;
+        UserIdClaim? result = null;
+        if (!string.IsNullOrWhiteSpace(claimValue))
+        {
+            result = claimValue;
+        }
+        return ValueTask.FromResult(result);
+    }
+}
+
+//usage
+//Automatically UserId will be populated with UserId Claim of the logged in user
+public record Request(int Id, UserIdClaim UserId, string Description)
 ```
 
 ## Dependency Injection

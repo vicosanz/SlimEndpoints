@@ -10,7 +10,7 @@
 
         private void WriteFile()
         {
-            List<string> usings = ["System"];
+            List<string> usings = ["System", "System.Diagnostics.CodeAnalysis"];
             foreach (var data in metadata)
             {
                 usings.Add(data.Namespace);
@@ -43,6 +43,20 @@
                             WriteLine();
                         }
                     });
+                });
+                WriteLine();
+                WriteBrace($"public static IEndpointRouteBuilder UseSlimEndpoints{group}(this IEndpointRouteBuilder app, [StringSyntax(\"Route\")] string prefix)", () =>
+                {
+                    WriteLine($"var group = app.MapGroup(prefix);");
+                    WriteBrace("using (var scope = app.ServiceProvider.CreateScope())", () =>
+                    {
+                        foreach (var data in metadata)
+                        {
+                            WriteLine($"scope.ServiceProvider.GetRequiredService<{data.Name}Implementation>().UseSlimEndpoint(group);");
+                            WriteLine();
+                        }
+                    });
+                    WriteLine("return app;");
                 });
             });
             WriteLine();
