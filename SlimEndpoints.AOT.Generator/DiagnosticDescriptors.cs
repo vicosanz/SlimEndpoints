@@ -16,5 +16,15 @@ namespace SlimEndpoints.AOT.Generator
                 DiagnosticSeverity.Error,
                 true
             );
+
+        public static readonly DiagnosticDescriptor PropertyWithBindAsyncOrTryParseAndFromAttribute =
+            new(
+                "SEI002",
+                "{0} property of {1} type in {2} endpoint request with BindAsync or TryParse should not have [From...] attributes",
+                "{0} property of {1} type in {2} endpoint request with BindAsync or TryParse should not have [From...] attributes",
+                DiagnosticCategories.SlimEndpoints,
+                DiagnosticSeverity.Warning,
+                true
+            );
     }
 }

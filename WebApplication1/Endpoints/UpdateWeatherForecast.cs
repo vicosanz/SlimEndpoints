@@ -11,7 +11,7 @@ public class UpdateWeatherForecastRequest
     public int Id { get; set; }
     [FromBody]
     [Required]
-    public UpdateWeatherForecastsRequest? Values { get; set; }
+    public UpdateWeatherForecastsRequestBase? Values { get; set; }
 }
 
 [SlimEndpoint("/update/{Id}", [HttpMehotds.Post], "weatherforecast")]

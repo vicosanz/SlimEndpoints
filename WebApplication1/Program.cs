@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Scalar.AspNetCore;
+using SlimEndpoints.AOT;
 
 internal class Program
 {

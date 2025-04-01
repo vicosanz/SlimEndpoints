@@ -13,8 +13,8 @@ public class GetWeatherForecastRequest
     public int Id { get; set; }
     [FromQuery]
     public string? Name { get; set; }
-    [FromHeader(Name = "Content-Type")]
-    public string? contentType { get; set; }
+    [FromHeader(Name = "Accept")]
+    public string? accept { get; set; }
 }
 
 [SlimEndpoint("/{Id}", [HttpMehotds.Get], "weatherforecast")]

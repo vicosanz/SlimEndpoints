@@ -40,7 +40,7 @@ namespace SlimEndpoints.AOT.Generator
             if (type.IsDefaultOrEmpty) return;
 
             List<Metadata> slimEndpoints = GetSlimpEndpoints(compilation, type.Distinct(), context);
-            var groups = slimEndpoints.GroupBy(x => x.Group);
+            var groups = slimEndpoints.GroupBy(x => x.Group, StringComparer.InvariantCultureIgnoreCase);
 
             if (groups.Any())
             {
@@ -150,8 +150,25 @@ namespace SlimEndpoints.AOT.Generator
                     requestTypeSymbolProperties = [.. 
                         requestTypeSymbol.GetMembers().OfType<IPropertySymbol>()
                             .Where(x => x.DeclaredAccessibility == Accessibility.Public)
-                            .Select(x => new TypeProperty(x.Type, x.Name, x.GetAnnotations()))
+                            .Select(x => new TypeProperty(x.Type, x.Name, x.GetAnnotations(), x.HasBindParses()))
                         ];
+
+                    var errorProperties = requestTypeSymbolProperties.
+                        Where(x => x.HasBindParses && (
+                                x.Annotations.Contains(".FromRoute") ||
+                                x.Annotations.Contains(".FromQuery") ||
+                                x.Annotations.Contains(".FromHeader") ||
+                                x.Annotations.Contains(".FromForm") ||
+                                x.Annotations.Contains(".FromBody")
+                        ))
+                        .ToList();
+
+                    foreach (var errorProperty in errorProperties)
+                    {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(DiagnosticDescriptors.PropertyWithBindAsyncOrTryParseAndFromAttribute, null, errorProperty.Name, requestTypeSymbol.ToString(), typeSymbol.Name)
+                        );
+                    }
                 }
 
                 string route = "";
@@ -176,6 +193,77 @@ namespace SlimEndpoints.AOT.Generator
                         }
                     }
                 }
+
+                string propertiesWithTypeAndAnnotations = "";
+                string propertiesWithType = "";
+                string propertiesNames = "";
+                string propertiesParse = "";
+                string propertiesFromContext = "";
+                bool isRequestFromBody = false;
+                bool isRequestAsParameter = false;
+                if (requestTypeSymbolProperties != null)
+                {
+                    if (requestTypeKind == "struct" || requestTypeKind == "record" || requestTypeKind == "record struct")
+                    {
+                        isRequestAsParameter = true;
+                    }
+                    else if (verbs.Any(x => x.Equals(HttpMehotds.Post, StringComparison.InvariantCultureIgnoreCase)
+                        || x.Equals(HttpMehotds.Put, StringComparison.InvariantCultureIgnoreCase)
+                        || x.Equals(HttpMehotds.Patch, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        isRequestFromBody = true;
+                        if (route.Contains("{") ||
+                            requestTypeSymbolProperties.Any(x =>
+                                x.HasBindParses ||
+                                x.Annotations.Contains(".FromRoute") ||
+                                x.Annotations.Contains(".FromQuery") ||
+                                x.Annotations.Contains(".FromHeader") ||
+                                x.Annotations.Contains(".FromForm") ||
+                                x.Annotations.Contains(".FromBody")
+                            )
+                        )
+                        {
+                            isRequestFromBody = false;
+                        }
+                    }
+
+                    if (!isRequestFromBody && !isRequestAsParameter)
+                    {
+                        propertiesWithTypeAndAnnotations = string.Join(", ", requestTypeSymbolProperties.Select(x => $"{x.Annotations}{x.Type} {x.Name}")) + ", ";
+                        propertiesWithType = string.Join(", ", requestTypeSymbolProperties.Select(x => $"{x.Type} {x.Name}")) + ", ";
+                        propertiesNames = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name}")) + ", ";
+                        if (isRequestTypePositionRecord)
+                        {
+                            propertiesParse = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name}"));
+                        }
+                        else
+                        {
+                            propertiesParse = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name} = {x.Name}"));
+                        }
+                        int param = 0;
+                        propertiesFromContext = string.Join(", ", requestTypeSymbolProperties?.Select(x =>
+                        {
+                            param++;
+                            return isRequestTypePositionRecord
+                                ? $"context.GetArgument<{x.Type}>({param})"
+                                : $"{x.Name} = context.GetArgument<{x.Type}>({param})";
+                        }));
+                    }
+                    else
+                    {
+                        string attribute = isRequestFromBody
+                            ? "[Microsoft.AspNetCore.Mvc.FromBody]" :
+                                isRequestAsParameter
+                                    ? "[Microsoft.AspNetCore.Http.AsParameters]"
+                                    : "";
+                        propertiesWithTypeAndAnnotations = $"{attribute} {requestType} request, ";
+                        propertiesWithType = $"{requestType} request, ";
+                        propertiesNames = "request, ";
+                        propertiesParse = "";
+                        propertiesFromContext = $"context.GetArgument<{requestType}>(1)";
+                    }
+                }
+
                 slimEndpoints.Add(
                     new Metadata(type.GetNamespace(),
                                         type.GetUsings(),
@@ -191,7 +279,17 @@ namespace SlimEndpoints.AOT.Generator
                                         requestTypeSymbolProperties,
                                         route,
                                         verbs,
-                                        group));
+                                        group,
+
+                                        propertiesWithTypeAndAnnotations,
+                                        propertiesWithType,
+                                        propertiesNames,
+                                        propertiesParse,
+                                        propertiesFromContext,
+                                        isRequestFromBody,
+                                        isRequestAsParameter
+
+                                        ));
             }
             return slimEndpoints;
         }

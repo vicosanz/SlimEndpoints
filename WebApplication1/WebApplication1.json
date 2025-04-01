@@ -151,7 +151,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateWeatherForecastsRequest"
+                "$ref": "#/components/schemas/UpdateWeatherForecastsRequestBase"
               }
             }
           },
@@ -200,7 +200,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateWeatherForecastsRequest2"
+                "$ref": "#/components/schemas/UpdateWeatherForecastsRequestBase2"
               }
             }
           },
@@ -574,7 +574,7 @@
           }
         }
       },
-      "UpdateWeatherForecastsRequest": {
+      "UpdateWeatherForecastsRequestBase": {
         "required": [
           "name"
         ],
@@ -587,7 +587,7 @@
         },
         "nullable": true
       },
-      "UpdateWeatherForecastsRequest2": {
+      "UpdateWeatherForecastsRequestBase2": {
         "required": [
           "name"
         ],

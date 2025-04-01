@@ -16,9 +16,28 @@ namespace SlimEndpoints.AOT.Generator
     /// <param name="RequestType"> Inner type </param>
     /// <param name="ResponseType"> Base Inner type </param>
     /// <param name="AdditionalConverters"> Array of additional converters </param>
-    public record Metadata(string Namespace, IReadOnlyList<string> Usings,
-        bool AllowNulls, string Name, string NameTyped, string FullName, string Modifiers,
-        string RequestType, string ResponseType, string? RequestTypeKind, bool IsRequestTypePositionRecord, List<TypeProperty>? RequestTypeProperties, string Route, string[] Verbs, string Group)
+    public record Metadata(string Namespace,
+                           IReadOnlyList<string> Usings,
+                           bool AllowNulls,
+                           string Name,
+                           string NameTyped,
+                           string FullName,
+                           string Modifiers,
+                           string RequestType,
+                           string ResponseType,
+                           string? RequestTypeKind,
+                           bool IsRequestTypePositionRecord,
+                           List<TypeProperty>? RequestTypeProperties,
+                           string Route,
+                           string[] Verbs,
+                           string Group,
+                           string PropertiesWithTypeAndAnnotations,
+                           string PropertiesWithType,
+                           string PropertiesNames,
+                           string PropertiesParse,
+                           string PropertiesFromContext,
+                           bool IsRequestFromBody,
+                           bool IsRequestAsParameter)
     {
         /// <summary>
         /// The namespace found in the base struct
@@ -76,6 +95,14 @@ namespace SlimEndpoints.AOT.Generator
         public string Route { get; internal set; } = Route;
         public string[] Verbs{ get; internal set; } = Verbs;
         public string Group { get; internal set; } = Group;
+
+        public string PropertiesWithTypeAndAnnotations { get; internal set; } = PropertiesWithTypeAndAnnotations;
+        public string PropertiesWithType { get; internal set; } = PropertiesWithType;
+        public string PropertiesNames { get; internal set; } = PropertiesNames;
+        public string PropertiesParse { get; internal set; } = PropertiesParse;
+        public string PropertiesFromContext { get; internal set; } = PropertiesFromContext;
+        public bool IsRequestFromBody { get; internal set; } = IsRequestFromBody;
+        public bool IsRequestAsParameter { get; internal set; } = IsRequestAsParameter;
     }
 
 }

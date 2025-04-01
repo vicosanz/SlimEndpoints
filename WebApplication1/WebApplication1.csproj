@@ -16,6 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ComplexType" Version="1.0.2" />
+    <PackageReference Include="ComplexType.Generator" Version="1.0.2" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.3">

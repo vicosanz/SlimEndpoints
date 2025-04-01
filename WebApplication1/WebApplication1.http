@@ -26,7 +26,7 @@ POST {{WebApplication1_HostAddress}}/weatherforecast/update
 Content-Type: application/json
 
 {
-  "Name": "none"
+  "Name": "non1e"
 }
 ###
 
@@ -42,7 +42,7 @@ GET {{WebApplication1_HostAddress}}/products/all
 Accept: application/json
 
 ###
-GET {{WebApplication1_HostAddress}}/products/byid/0
+GET {{WebApplication1_HostAddress}}/products/byid/10?groups=1&groups=2&groups=3
 Accept: application/json
 
 ###

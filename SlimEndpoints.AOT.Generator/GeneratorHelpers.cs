@@ -116,5 +116,16 @@ namespace SlimEndpoints.AOT.Generator
             if (attributes.Length == 0) return "";
             return string.Join(" ", attributes.Select(x => $"[{x}]"));
         }
+
+        public static bool HasBindParses(this IPropertySymbol x)
+        {
+            ITypeSymbol type = x.Type;
+            if (type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+            {
+                type = ((INamedTypeSymbol)type).TypeArguments[0];
+            }
+            if (type.DeclaringSyntaxReferences.Length == 0) return false;
+            return type.GetMembers().Where(x => x.IsStatic && (x.Name == "BindAsync" || x.Name == "TryParse")).Any();
+        }
     }
 }

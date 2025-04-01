@@ -8,6 +8,13 @@ namespace WebApplication1.Endpoints;
 
 public class UpdateWeatherForecastsRequest
 {
+    [FromBody]
+    public UpdateWeatherForecastsRequestBase Base { get; set; } = null!;
+    public UserNameClaim? UserName { get; set; }
+}
+
+public class UpdateWeatherForecastsRequestBase
+{
     [Required]
     public string? Name { get; set; }
 }
@@ -16,8 +23,8 @@ public class UpdateWeatherForecastsRequestValidator : AbstractValidator<UpdateWe
 {
     public UpdateWeatherForecastsRequestValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().WithMessage("Must provide a name");
-        RuleFor(x => x.Name).NotEqual("none").WithMessage("Name must not equal to none");
+        RuleFor(x => x.Base.Name).NotEmpty().WithMessage("Must provide a name");
+        RuleFor(x => x.Base.Name).NotEqual("none").WithMessage("Name must not equal to none");
     }
 }
 
@@ -44,7 +51,7 @@ public partial class UpdateWeatherForecasts :
     public override async Task<Results<Ok<WeatherForecast>, BadRequest<ProblemDetails>>>
         HandleAsync(HttpContext httpContext, UpdateWeatherForecastsRequest request, CancellationToken cancellationToken)
     {
-        var result = TypedResults.Ok(new WeatherForecast(0, request.Name));
+        var result = TypedResults.Ok(new WeatherForecast(0, request.Base.Name));
         return await Task.FromResult(result);
     }
 }
