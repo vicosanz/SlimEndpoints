@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Scalar.AspNetCore;
 using SlimEndpoints.AOT;
+using WebApplication1;
 
 internal class Program
 {

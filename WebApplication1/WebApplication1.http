@@ -46,10 +46,19 @@ GET {{WebApplication1_HostAddress}}/products/byid/10?groups=1&groups=2&groups=3
 Accept: application/json
 
 ###
-POST {{WebApplication1_HostAddress}}/products/slug/_%201
+POST {{WebApplication1_HostAddress}}/products/slug/201
 Content-Type: application/json
 
 {
+  "Name": "Laptop"
+}
+
+###
+POST {{WebApplication1_HostAddress}}/products/slug2/201
+Content-Type: application/json
+
+{
+    "Id":1,
   "Name": "Laptop"
 }
 
@@ -104,7 +113,7 @@ Content-Type: multipart/form-data; boundary=----MyBoundary
 ------MyBoundary
 Content-Disposition: form-data; name="__RequestVerificationToken"
 
-CfDJ8LiEdcm1FUNNsNEQ2yavrz2tfMHyWroINRshipBvcRVO0CBKdjbbDXnt--xU-nQW_1_Q5DbP8Nx7BN1e_3lfyy33YYmktdzsYKz8N0PaKYCq7Svht_lhv_tImEPw9InCu0ci1t31-wPPIjdJoOCgciQ
+CfDJ8LiEdcm1FUNNsNEQ2yavrz1N2VdgmtiX69R6YFAXvwwmDND4wSXvgQazRuJxXKAVdG4suQH624ZintcpCVdPaqEtKwF2mX5ubZIfCkAoAfxDRPEqv6itxfsgL3LmahV5GtggG_6N3LPyZM-HK1gb93k
 ------MyBoundary
 Content-Disposition: form-data; name="Name"
 

@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SlimEndpoints.AOT\SlimEndpoints.AOT.csproj" />
+    <ProjectReference Include="..\SlimEndpoints.AOT.Generator\SlimEndpoints.AOT.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ComplexType" Version="1.0.2" />
     <PackageReference Include="ComplexType.Generator" Version="1.0.2" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
@@ -25,11 +30,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Scalar.AspNetCore" Version="2.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SlimEndpoints.AOT\SlimEndpoints.AOT.csproj" />
-    <ProjectReference Include="..\SlimEndpoints.AOT.Generator\SlimEndpoints.AOT.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

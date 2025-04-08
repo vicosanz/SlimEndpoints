@@ -4,11 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace SlimEndpoints.AOT.Generator
 {
     public static class GeneratorHelpers
     {
+        public static string AsBodyAttribute = "SlimEndpoints.AOT.AsBodyAttribute";
+
+        public static string FromBodyAttribute = "Microsoft.AspNetCore.Mvc.FromBodyAttribute";
+        public static string FromFormAttribute = "Microsoft.AspNetCore.Mvc.FromFormAttribute";
+        public static string FromHeaderAttribute = "Microsoft.AspNetCore.Mvc.FromHeaderAttribute";
+        public static string FromQueryAttribute = "Microsoft.AspNetCore.Mvc.FromQueryAttribute";
+        public static string FromRouteAttribute = "Microsoft.AspNetCore.Mvc.FromRouteAttribute";
+        public static string FromServicesAttribute = "Microsoft.AspNetCore.Mvc.FromServicesAttribute";
+
+        public static string AsParametersAttribute = "Microsoft.AspNetCore.Http.AsParametersAttribute";
+
         public static bool IsTypePrimitiveOrId(string type) => type switch
         {
             "string" or "bool" or "byte" or "DateTime" or "DateTimeOffset" or
@@ -110,11 +122,16 @@ namespace SlimEndpoints.AOT.Generator
         public static string GetFileNameImplementationGenerated(this Metadata metadata)
             => $"{metadata.FullName.Replace('<', '_').Replace('>', '_')}Implementation.g.cs";
 
-        public static string GetAnnotations(this IPropertySymbol x)
+        public static List<string> GetAnnotations(this IPropertySymbol x, ITypeSymbol typeSymbol)
         {
-            var attributes = x.GetAttributes();
-            if (attributes.Length == 0) return "";
-            return string.Join(" ", attributes.Select(x => $"[{x}]"));
+            var attributes = x.GetAttributes().Select(x => x.ToString()).ToList();
+            if (typeSymbol.GetAttributes().Any(x => x.ToString() == AsBodyAttribute)
+                && !attributes.Any(x => x.ToString() == FromBodyAttribute))
+            {
+                attributes.Add(FromBodyAttribute);
+            }
+            //if (attributes.Count == 0) return [];
+            return attributes;
         }
 
         public static bool HasBindParses(this IPropertySymbol x)
@@ -126,6 +143,29 @@ namespace SlimEndpoints.AOT.Generator
             }
             if (type.DeclaringSyntaxReferences.Length == 0) return false;
             return type.GetMembers().Where(x => x.IsStatic && (x.Name == "BindAsync" || x.Name == "TryParse")).Any();
+        }
+
+        public static bool HasFromAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x == FromBodyAttribute
+                                                                                              || x == FromFormAttribute
+                                                                                              || x == FromHeaderAttribute
+                                                                                              || x == FromQueryAttribute
+                                                                                              || x == FromRouteAttribute);
+
+        public static bool HasFromBodyAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x == FromBodyAttribute);
+
+        public static bool HasNonFromBodyAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x == FromFormAttribute
+                                                                                              || x == FromHeaderAttribute
+                                                                                              || x == FromQueryAttribute
+                                                                                              || x == FromRouteAttribute);
+    
+        public static bool IsAUserClass(this ITypeSymbol typeSymbol)
+        {
+            if (typeSymbol.TypeKind == TypeKind.Class || typeSymbol.TypeKind == TypeKind.Struct || typeSymbol.IsRecord)
+            {
+                return typeSymbol.SpecialType == SpecialType.None && typeSymbol.ContainingNamespace.ToString() != "System";
+            }
+            
+            return false;
         }
     }
 }

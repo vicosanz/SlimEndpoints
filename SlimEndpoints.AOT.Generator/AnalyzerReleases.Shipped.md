@@ -6,3 +6,4 @@ Rule ID | Category        | Severity | Notes
 --------|-----------------|----------|--------------------
 SEI001  | SlimEndpoints   | Error    | This request type cannot be used as request, create a User class or record instead.
 SEI002  | SlimEndpoints   | Error    | Property of Request type in Endpoint request with BindAsync or TryParse should not have [From...] attributes
+SEI003  | SlimEndpoints   | Warning  | Property of Request type in Endpoint request has a primitive as FromBody, use a class or record parameter instead

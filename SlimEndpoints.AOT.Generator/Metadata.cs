@@ -37,7 +37,11 @@ namespace SlimEndpoints.AOT.Generator
                            string PropertiesParse,
                            string PropertiesFromContext,
                            bool IsRequestFromBody,
-                           bool IsRequestAsParameter)
+                           bool IsRequestAsParameter,
+                           string ParseinnerBodyRequest,
+                           string RecordParametersBodyRequest,
+                           string? AuxiliarBodyRequestClassName,
+                           bool CreateAuxiliarBodyRequestClass)
     {
         /// <summary>
         /// The namespace found in the base struct
@@ -103,6 +107,10 @@ namespace SlimEndpoints.AOT.Generator
         public string PropertiesFromContext { get; internal set; } = PropertiesFromContext;
         public bool IsRequestFromBody { get; internal set; } = IsRequestFromBody;
         public bool IsRequestAsParameter { get; internal set; } = IsRequestAsParameter;
+        public string ParseinnerBodyRequest { get; internal set; } = ParseinnerBodyRequest;
+        public string RecordParametersBodyRequest { get; internal set; } = RecordParametersBodyRequest;
+        public string? AuxiliarBodyRequestClassName { get; internal set; } = AuxiliarBodyRequestClassName;
+        public bool CreateAuxiliarBodyRequestClass { get; internal set; } = CreateAuxiliarBodyRequestClass;
     }
 
 }

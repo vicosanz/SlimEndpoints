@@ -26,5 +26,15 @@ namespace SlimEndpoints.AOT.Generator
                 DiagnosticSeverity.Warning,
                 true
             );
+
+        public static readonly DiagnosticDescriptor FromBodyIsPrimitive =
+            new(
+                "SEI003",
+                "{0} type in {1} endpoint request has a primitive as FromBody, use a class or record parameter instead",
+                "{0} type in {1} endpoint request has a primitive as FromBody, use a class or record parameter instead",
+                DiagnosticCategories.SlimEndpoints,
+                DiagnosticSeverity.Warning,
+                true
+            );
     }
 }

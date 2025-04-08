@@ -32,6 +32,18 @@ namespace SlimEndpoints.AOT.Generator
 
         private void WriteSlimEndpoints()
         {
+            if (metadata.CreateAuxiliarBodyRequestClass)
+            {
+                WriteNested($"public record {metadata.AuxiliarBodyRequestClassName}", "(", ");", () =>
+                {
+                    WriteLine($"{metadata.RecordParametersBodyRequest}");
+                    //foreach(var property in metadata.RequestTypeProperties.Where(x => x.HasFromBoyAnnotations()))
+                    //{
+                    //    WriteLine($"public {property.Type} {property.Name} {{ get; set; }}");
+                    //}
+                });
+                WriteLine();
+            }
             WriteBrace($"{metadata.Modifiers} class {metadata.NameTyped}Implementation({metadata.NameTyped} endpoint)", () =>
             {
                 WriteLine($"private readonly {metadata.NameTyped} endpoint = endpoint;");
@@ -40,7 +52,7 @@ namespace SlimEndpoints.AOT.Generator
                 {
                     WriteIdented($"var route = app.MapMethods(\"{metadata.Route}\", [\"{string.Join(", ", metadata.Verbs)}\"],", () =>
                     {
-                        WriteBracedArrowFunction($"static ([FromServices] {metadata.NameTyped}Implementation implementation, {metadata.PropertiesWithTypeAndAnnotations}HttpContext httpContext, CancellationToken cancellationToken) =>", () =>
+                        WriteBracedArrowFunction($"static ([{GeneratorHelpers.FromServicesAttribute}] {metadata.NameTyped}Implementation implementation, {metadata.PropertiesWithTypeAndAnnotations}HttpContext httpContext, CancellationToken cancellationToken) =>", () =>
                         {
                             WriteLine($"return implementation.HandleAsync({metadata.PropertiesNames}httpContext, cancellationToken);");
                         });
@@ -88,6 +100,10 @@ namespace SlimEndpoints.AOT.Generator
                     }
                     else
                     {
+                        if (!string.IsNullOrWhiteSpace(metadata.ParseinnerBodyRequest))
+                        {
+                            WriteLine(metadata.ParseinnerBodyRequest);
+                        }
                         if (metadata.IsRequestTypePositionRecord)
                         {
                             WriteLine($"var request = new {metadata.RequestType}({metadata.PropertiesFromContext});");

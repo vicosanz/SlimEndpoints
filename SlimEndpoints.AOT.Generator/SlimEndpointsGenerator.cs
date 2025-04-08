@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -117,7 +118,11 @@ namespace SlimEndpoints.AOT.Generator
                         }
                     }
                 }
-                List<TypeProperty>? requestTypeSymbolProperties = null;
+                List<TypeProperty>? requestTypeSymbolProperties = [];
+                string? auxiliarBodyRequestClassName = null;
+                bool createAuxiliarBodyRequestClass = false;
+                bool useAuxiliarBodyRequestClass = false;
+
                 if (requestType != "SlimEndpoints.AOT.Unit")
                 {
                     var requestTypeSymbol = semanticModel.GetTypeInfo(requestTypeSyntax!).Type;
@@ -147,21 +152,45 @@ namespace SlimEndpoints.AOT.Generator
                         }
                     }
                     isRequestTypePositionRecord = requestTypeSymbol.IsRecord && ((INamedTypeSymbol)requestTypeSymbol).Constructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length > 0);
-                    requestTypeSymbolProperties = [.. 
-                        requestTypeSymbol.GetMembers().OfType<IPropertySymbol>()
+
+                    var currentSymbol = requestTypeSymbol;
+                    while (currentSymbol != null && currentSymbol.SpecialType != SpecialType.System_Object)
+                    {
+                        var baseTypeProperties = currentSymbol.GetMembers().OfType<IPropertySymbol>()
                             .Where(x => x.DeclaredAccessibility == Accessibility.Public)
-                            .Select(x => new TypeProperty(x.Type, x.Name, x.GetAnnotations(), x.HasBindParses()))
-                        ];
+                            .Select(x => new TypeProperty(currentSymbol, x.Type, x.Name, x.GetAnnotations(currentSymbol), x.HasBindParses()));
+                        requestTypeSymbolProperties.AddRange(baseTypeProperties);
+
+                        currentSymbol = currentSymbol.BaseType;
+                    }
+
+                    var fromBodys = requestTypeSymbolProperties.Where(x => x.HasFromBodyAnnotations()).ToList();
+                    var fromBodyClass = fromBodys.Select(x => x.TypeSymbol).Distinct(SymbolEqualityComparer.Default).ToList();
+
+                    if (fromBodyClass.Count == 1)
+                    {
+                        if (!requestTypeSymbolProperties
+                            .Where(x => x.TypeSymbol.Equals(fromBodyClass[0], SymbolEqualityComparer.Default))
+                            .Any(x => x.Annotations.Count == 0 || x.HasNonFromBodyAnnotations() || x.HasBindParses))
+                        {
+                            auxiliarBodyRequestClassName = fromBodyClass[0]!.ToString();
+                            createAuxiliarBodyRequestClass = false;
+                            useAuxiliarBodyRequestClass = true;
+                        }
+                        else if (fromBodys.Count() == 1 && !fromBodys.First().Type.IsAUserClass())
+                        {
+                            context.ReportDiagnostic(
+                                Diagnostic.Create(DiagnosticDescriptors.FromBodyIsPrimitive, null, requestTypeSymbol.ToString(), typeSymbol.Name)
+                            );
+                            createAuxiliarBodyRequestClass = true;
+                            useAuxiliarBodyRequestClass = true;
+                        }
+                    }
 
                     var errorProperties = requestTypeSymbolProperties.
                         Where(x => x.HasBindParses && (
-                                x.Annotations.Contains(".FromRoute") ||
-                                x.Annotations.Contains(".FromQuery") ||
-                                x.Annotations.Contains(".FromHeader") ||
-                                x.Annotations.Contains(".FromForm") ||
-                                x.Annotations.Contains(".FromBody")
-                        ))
-                        .ToList();
+                            x.HasFromAnnotations()
+                        ));
 
                     foreach (var errorProperty in errorProperties)
                     {
@@ -199,9 +228,11 @@ namespace SlimEndpoints.AOT.Generator
                 string propertiesNames = "";
                 string propertiesParse = "";
                 string propertiesFromContext = "";
+                string parseinnerBodyRequest = "";
+                string recordParametersBodyRequest = "";
                 bool isRequestFromBody = false;
                 bool isRequestAsParameter = false;
-                if (requestTypeSymbolProperties != null)
+                if (requestTypeSymbolProperties.Count > 0)
                 {
                     if (requestTypeKind == "struct" || requestTypeKind == "record" || requestTypeKind == "record struct")
                     {
@@ -215,11 +246,7 @@ namespace SlimEndpoints.AOT.Generator
                         if (route.Contains("{") ||
                             requestTypeSymbolProperties.Any(x =>
                                 x.HasBindParses ||
-                                x.Annotations.Contains(".FromRoute") ||
-                                x.Annotations.Contains(".FromQuery") ||
-                                x.Annotations.Contains(".FromHeader") ||
-                                x.Annotations.Contains(".FromForm") ||
-                                x.Annotations.Contains(".FromBody")
+                                x.HasFromAnnotations()
                             )
                         )
                         {
@@ -229,32 +256,98 @@ namespace SlimEndpoints.AOT.Generator
 
                     if (!isRequestFromBody && !isRequestAsParameter)
                     {
-                        propertiesWithTypeAndAnnotations = string.Join(", ", requestTypeSymbolProperties.Select(x => $"{x.Annotations}{x.Type} {x.Name}")) + ", ";
-                        propertiesWithType = string.Join(", ", requestTypeSymbolProperties.Select(x => $"{x.Type} {x.Name}")) + ", ";
-                        propertiesNames = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name}")) + ", ";
-                        if (isRequestTypePositionRecord)
+                        if (useAuxiliarBodyRequestClass)
                         {
-                            propertiesParse = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name}"));
+                            if (createAuxiliarBodyRequestClass)
+                            {
+                                auxiliarBodyRequestClassName = $"{typeSymbol.Name}__BodyRequest";
+                            }
+
+                            recordParametersBodyRequest = string.Join(", ", requestTypeSymbolProperties
+                                .Where(x => x.HasFromBodyAnnotations()).Select(x => $"{x.Type} {x.Name}"));
+
+                            propertiesWithTypeAndAnnotations = string.Join(", ", requestTypeSymbolProperties
+                                .Where(x => !x.HasFromBodyAnnotations()).Select(x => $"{string.Join(" ", x.Annotations.Select(x => $"[{x}]"))}{x.Type} {x.Name}")) 
+                                + $", [{GeneratorHelpers.FromBodyAttribute}] {auxiliarBodyRequestClassName} __request, ";
+
+                            propertiesWithType = string.Join(", ", requestTypeSymbolProperties
+                                .Where(x => !x.HasFromBodyAnnotations()).Select(x => $"{x.Type} {x.Name}")) + $", {auxiliarBodyRequestClassName} __request, ";
+
+                            propertiesNames = string.Join(", ", requestTypeSymbolProperties?
+                                .Where(x => !x.HasFromBodyAnnotations()).Select(x => $"{x.Name}")) + $", __request, ";
+
+                            if (isRequestTypePositionRecord)
+                            {
+                                propertiesParse = string.Join(", ", requestTypeSymbolProperties?.Select(x =>
+                                {
+                                    if (x.HasFromBodyAnnotations())
+                                    {
+                                        return $"__request.{x.Name}";
+                                    }
+                                    return $"{x.Name}";
+                                }));
+                            }
+                            else
+                            {
+                                propertiesParse = string.Join(", ", requestTypeSymbolProperties?.Select(x =>
+                                {
+                                    if (x.HasFromBodyAnnotations())
+                                    {
+                                        return $"{x.Name} = __request.{x.Name}";
+                                    }
+                                    return $"{x.Name} = {x.Name}";
+                                }));
+                            }
+
+                            int param = 0;
+                            propertiesFromContext = string.Join(", ", requestTypeSymbolProperties?
+                                .Where(x => !x.HasFromBodyAnnotations()).Select(x =>
+                                {
+                                    param++;
+                                    return isRequestTypePositionRecord
+                                        ? $"context.GetArgument<{x.Type}>({param})"
+                                        : $"{x.Name} = context.GetArgument<{x.Type}>({param})";
+                                })) + ", ";
+
+                            param++;
+                            parseinnerBodyRequest = $"var __requestBody = context.GetArgument<{auxiliarBodyRequestClassName}>({param});";
+                            propertiesFromContext += string.Join(", ", requestTypeSymbolProperties?
+                                .Where(x => x.HasFromBodyAnnotations()).Select(x =>
+                                {
+                                    return isRequestTypePositionRecord
+                                        ? $"__requestBody.{x.Name}"
+                                        : $"{x.Name} = __requestBody.{x.Name}";
+                                }));
                         }
                         else
                         {
-                            propertiesParse = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name} = {x.Name}"));
+                            propertiesWithTypeAndAnnotations = string.Join(", ", requestTypeSymbolProperties.Select(x => $"{string.Join(" ", x.Annotations.Select(x=> $"[{x}]"))}{x.Type} {x.Name}")) + ", ";
+                            propertiesWithType = string.Join(", ", requestTypeSymbolProperties.Select(x => $"{x.Type} {x.Name}")) + ", ";
+                            propertiesNames = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name}")) + ", ";
+                            if (isRequestTypePositionRecord)
+                            {
+                                propertiesParse = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name}"));
+                            }
+                            else
+                            {
+                                propertiesParse = string.Join(", ", requestTypeSymbolProperties?.Select(x => $"{x.Name} = {x.Name}"));
+                            }
+                            int param = 0;
+                            propertiesFromContext = string.Join(", ", requestTypeSymbolProperties?.Select(x =>
+                            {
+                                param++;
+                                return isRequestTypePositionRecord
+                                    ? $"context.GetArgument<{x.Type}>({param})"
+                                    : $"{x.Name} = context.GetArgument<{x.Type}>({param})";
+                            }));
                         }
-                        int param = 0;
-                        propertiesFromContext = string.Join(", ", requestTypeSymbolProperties?.Select(x =>
-                        {
-                            param++;
-                            return isRequestTypePositionRecord
-                                ? $"context.GetArgument<{x.Type}>({param})"
-                                : $"{x.Name} = context.GetArgument<{x.Type}>({param})";
-                        }));
                     }
                     else
                     {
                         string attribute = isRequestFromBody
-                            ? "[Microsoft.AspNetCore.Mvc.FromBody]" :
+                            ? $"[{GeneratorHelpers.FromBodyAttribute}]" :
                                 isRequestAsParameter
-                                    ? "[Microsoft.AspNetCore.Http.AsParameters]"
+                                    ? $"[{GeneratorHelpers.AsParametersAttribute}]"
                                     : "";
                         propertiesWithTypeAndAnnotations = $"{attribute} {requestType} request, ";
                         propertiesWithType = $"{requestType} request, ";
@@ -287,8 +380,11 @@ namespace SlimEndpoints.AOT.Generator
                                         propertiesParse,
                                         propertiesFromContext,
                                         isRequestFromBody,
-                                        isRequestAsParameter
-
+                                        isRequestAsParameter,
+                                        parseinnerBodyRequest,
+                                        recordParametersBodyRequest,
+                                        auxiliarBodyRequestClassName,
+                                        createAuxiliarBodyRequestClass
                                         ));
             }
             return slimEndpoints;

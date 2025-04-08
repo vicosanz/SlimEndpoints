@@ -312,6 +312,45 @@
         }
       }
     },
+    "/products/slug2/{slug}": {
+      "post": {
+        "tags": [
+          "WebApplication1"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/products/slug/{slug}": {
       "post": {
         "tags": [
@@ -521,6 +560,18 @@
   },
   "components": {
     "schemas": {
+      "Body": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "IFormFile": {
         "type": "string",
         "format": "binary"

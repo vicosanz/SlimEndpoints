@@ -166,6 +166,31 @@ public class UpdateWeatherForecastsRequest
 
 ```
 
+## FromBody
+
+If you declare multiple [FromBody] parameters, the source generator will create a Record with all the properties and the request will be injected as a single parameter.
+This new Record source generated has not support for AOT compilation because is not possible to source generate json serialization context of a Record not defined by user,
+the solution is inherit from a class with all properties with [FromBody] attribute or decorate the auxiliar class with [AsBody] attribute,
+all properties must be decorated with [FromBody] attribute, if you use a property with another [From...] attribute, 
+the source generator will generate a Record only with the properties with [FromBody] attribute.
+
+```csharp
+public class PostSlug2Request : BodyAuxiliar
+{
+    public string Slug { get; set; } 
+}
+
+[AsBody] // You can put one AsBody here or decorate each parameter with [FromBody]
+public class BodyAuxiliar  
+{
+    [FromBody] // If the class is decorated with [AsBody] you can remove this attribute
+    public int Id { get; set; }
+    [FromBody] // If the class is decorated with [AsBody] you can remove this attribute
+    public string Name { get; set; }
+}
+
+```
+
 ## Configure route
 
 Routes can be configured from registration or from the handler itself.
