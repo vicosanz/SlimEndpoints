@@ -9,10 +9,11 @@ namespace WebApplication1.Endpoints.Products.PostSlug2
         public UserNameClaim? UserName { get; set; }
     }
 
-    [AsBody]
     public class Body  
     {
+        [FromBody]
         public int Id { get; set; }
+        [FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Default)]
         public string Name { get; set; }
     }
 

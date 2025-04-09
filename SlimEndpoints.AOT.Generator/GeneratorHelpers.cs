@@ -126,7 +126,7 @@ namespace SlimEndpoints.AOT.Generator
         {
             var attributes = x.GetAttributes().Select(x => x.ToString()).ToList();
             if (typeSymbol.GetAttributes().Any(x => x.ToString() == AsBodyAttribute)
-                && !attributes.Any(x => x.ToString() == FromBodyAttribute))
+                && !attributes.Any(x => x.ToString().StartsWith(FromBodyAttribute)))
             {
                 attributes.Add(FromBodyAttribute);
             }
@@ -145,18 +145,18 @@ namespace SlimEndpoints.AOT.Generator
             return type.GetMembers().Where(x => x.IsStatic && (x.Name == "BindAsync" || x.Name == "TryParse")).Any();
         }
 
-        public static bool HasFromAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x == FromBodyAttribute
-                                                                                              || x == FromFormAttribute
-                                                                                              || x == FromHeaderAttribute
-                                                                                              || x == FromQueryAttribute
-                                                                                              || x == FromRouteAttribute);
+        public static bool HasFromAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x.StartsWith(FromBodyAttribute)
+                                                                                              || x.StartsWith(FromFormAttribute)
+                                                                                              || x.StartsWith(FromHeaderAttribute)
+                                                                                              || x.StartsWith(FromQueryAttribute)
+                                                                                              || x.StartsWith(FromRouteAttribute));
 
-        public static bool HasFromBodyAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x == FromBodyAttribute);
+        public static bool HasFromBodyAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x.StartsWith(FromBodyAttribute));
 
-        public static bool HasNonFromBodyAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x == FromFormAttribute
-                                                                                              || x == FromHeaderAttribute
-                                                                                              || x == FromQueryAttribute
-                                                                                              || x == FromRouteAttribute);
+        public static bool HasNonFromBodyAnnotations(this TypeProperty typeProperty) => typeProperty.Annotations.Any(x => x.StartsWith(FromFormAttribute)
+                                                                                              || x.StartsWith(FromHeaderAttribute)
+                                                                                              || x.StartsWith(FromQueryAttribute)
+                                                                                              || x.StartsWith(FromRouteAttribute));
     
         public static bool IsAUserClass(this ITypeSymbol typeSymbol)
         {
