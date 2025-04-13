@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,6 +15,8 @@ namespace SlimEndpoints.AOT.Generator
         private static readonly string iSlimEndpointType = "SlimEndpoint<";
         private static readonly string iSlimEndpointWithoutRequest = "SlimEndpointWithoutRequest<";
         private static readonly string iSlimEndpointWithoutResponse = "SlimEndpointWithoutResponse<";
+        private static readonly string slimEndpointPipelineAttribute = "SlimEndpoints.AOT.SlimEndpointPipelineAttribute";
+        private static readonly string iSlimEndpointPipelineType = "SlimEndpointPipeline<";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -29,23 +29,32 @@ namespace SlimEndpoints.AOT.Generator
                     transform: static (ctx, _) => ctx.GetSemanticTargetForGeneration(slimEndpointAttribute))
                 .Where(static m => m is not null)!;
 
-            IncrementalValueProvider<(Compilation, ImmutableArray<TypeDeclarationSyntax>)> compilationAndEnums
-                = context.CompilationProvider.Combine(typeDeclarations.Collect());
-            
+            IncrementalValuesProvider<TypeDeclarationSyntax> typePipelineDeclarations = context.SyntaxProvider
+                .CreateSyntaxProvider(
+                    predicate: static (s, _) => s.IsSyntaxTargetForGeneration(),
+                    transform: static (ctx, _) => ctx.GetSemanticTargetForGeneration(slimEndpointPipelineAttribute))
+                .Where(static m => m is not null)!;
+
+            var typesFound = typeDeclarations.Collect().Combine(typePipelineDeclarations.Collect());
+            var compilationAndEnums = context.CompilationProvider.Combine(typesFound);
+
             context.RegisterSourceOutput(compilationAndEnums,
                 static (spc, source) => Execute(source.Item1, source.Item2, spc));
         }
 
-        private static void Execute(Compilation compilation, ImmutableArray<TypeDeclarationSyntax> type, SourceProductionContext context)
+        private static void Execute(Compilation compilation, 
+            (ImmutableArray<TypeDeclarationSyntax> type, ImmutableArray<TypeDeclarationSyntax> pipelines) item2, SourceProductionContext context)
         {
-            if (type.IsDefaultOrEmpty) return;
+            if (item2.type.IsDefaultOrEmpty) return;
 
-            List<Metadata> slimEndpoints = GetSlimpEndpoints(compilation, type.Distinct(), context);
+            List<Metadata> slimEndpoints = GetSlimpEndpoints(compilation, item2.type.Distinct(), context);
+            List<Pipeline> slimPipelines = GetSlimpPipelines(compilation, item2.pipelines.Distinct(), context).OrderBy(x=> x.Order).ToList();
+
             var groups = slimEndpoints.GroupBy(x => x.Group, StringComparer.InvariantCultureIgnoreCase);
 
             if (groups.Any())
             {
-                var generatorAddSlimEndpoints = new AddSlimEndpointsWriter(slimEndpoints);
+                var generatorAddSlimEndpoints = new AddSlimEndpointsWriter(slimEndpoints, slimPipelines);
                 context.AddSource($"{compilation.Assembly.MetadataName}.AddSlimEndpoints.g.cs",
                     SourceText.From(generatorAddSlimEndpoints.GetCode(), Encoding.UTF8));
 
@@ -57,7 +66,7 @@ namespace SlimEndpoints.AOT.Generator
 
                     foreach (var slimEndpoint in group)
                     {
-                        var generatorSlimEndpoint = new SlimEndpointsWriter(slimEndpoint);
+                        var generatorSlimEndpoint = new SlimEndpointsWriter(slimEndpoint, slimPipelines);
                         context.AddSource(slimEndpoint.GetFileNameImplementationGenerated(),
                             SourceText.From(generatorSlimEndpoint.GetCode(), Encoding.UTF8));
                     }
@@ -67,6 +76,58 @@ namespace SlimEndpoints.AOT.Generator
                 context.AddSource($"{compilation.Assembly.MetadataName}.Validators.g.cs",
                     SourceText.From(generatorValidator.GetCode(), Encoding.UTF8));
             }
+        }
+
+        private static List<Pipeline> GetSlimpPipelines(Compilation compilation, IEnumerable<TypeDeclarationSyntax> types, SourceProductionContext context)
+        {
+            var slimPipelines = new List<Pipeline>();
+
+            foreach (var type in types)
+            {
+                context.CancellationToken.ThrowIfCancellationRequested();
+
+                SemanticModel semanticModel = compilation.GetSemanticModel(type.SyntaxTree);
+                if (semanticModel.GetDeclaredSymbol(type) is not INamedTypeSymbol typeSymbol)
+                {
+                    // report diagnostic, something went wrong
+                    continue;
+                }
+
+                int order = 0;
+                foreach (var attribute in typeSymbol.GetAttributes())
+                {
+                    if (attribute.AttributeClass!.ToDisplayString().Equals(slimEndpointPipelineAttribute, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (attribute.ConstructorArguments.Any())
+                        {
+                            order = (int)attribute.ConstructorArguments[0].Value!;
+                        }
+                    }
+                }
+
+                if (typeSymbol.TypeArguments.Count() != 2)
+                {
+                    continue;
+                }
+                var argument1 = typeSymbol.TypeArguments[0];
+                var argument2 = typeSymbol.TypeArguments[1];
+
+                var constructorParameters = typeSymbol.Constructors.FirstOrDefault()?.Parameters;
+
+                slimPipelines.Add(new Pipeline()
+                {
+                    Namespace = type.GetNamespace(),
+                    Usings = type.GetUsings(),
+                    Name = typeSymbol.Name,
+                    NameTyped = typeSymbol.GetNameTyped(),
+                    Type = typeSymbol.ToString(),
+                    Modifiers = type.GetModifiers(),
+                    TypeSymbol = typeSymbol,
+                    Order = order,
+                    ConstructorParameters = constructorParameters,
+                });
+            }
+            return slimPipelines;
         }
 
         protected static List<Metadata> GetSlimpEndpoints(Compilation compilation,
@@ -99,22 +160,22 @@ namespace SlimEndpoints.AOT.Generator
                         {
                             var argumentsType = (GenericNameSyntax)baseType.Type;
                             requestTypeSyntax = argumentsType.TypeArgumentList.Arguments[0];
-                            requestType = requestTypeSyntax.ToFullString();
+                            requestType = requestTypeSyntax.GetFullQualifiedName(semanticModel);
                             if (argumentsType.TypeArgumentList.Arguments.Count > 1)
                             {
-                                responseType = argumentsType.TypeArgumentList.Arguments[1].ToFullString();
+                                responseType = argumentsType.TypeArgumentList.Arguments[1].GetFullQualifiedName(semanticModel);
                             }
                         }
                         else if (baseType.ToFullString().Contains(iSlimEndpointWithoutRequest))
                         {
                             var argumentsType = (GenericNameSyntax)baseType.Type;
-                            responseType = argumentsType.TypeArgumentList.Arguments[0].ToFullString();
+                            responseType = argumentsType.TypeArgumentList.Arguments[0].GetFullQualifiedName(semanticModel);
                         }
                         else if (baseType.ToFullString().Contains(iSlimEndpointWithoutResponse))
                         {
                             var argumentsType = (GenericNameSyntax)baseType.Type;
                             requestTypeSyntax = argumentsType.TypeArgumentList.Arguments[0];
-                            requestType = requestTypeSyntax.ToFullString();
+                            requestType = requestTypeSyntax.GetFullQualifiedName(semanticModel);
                         }
                     }
                 }

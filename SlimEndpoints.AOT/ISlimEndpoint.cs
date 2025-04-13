@@ -10,7 +10,7 @@ public interface ISlimEndpoint
     void Configure(RouteHandlerBuilder builder);
 }
 
-public interface ISlimEndpoint<TRequest, TResponse> : ISlimEndpoint 
+public interface ISlimEndpoint<in TRequest, out TResponse> : ISlimEndpoint 
 {
     IResult Validate(TRequest request);
 }
@@ -42,6 +42,21 @@ public abstract class SlimEndpointWithoutResponse<TRequest> : ISlimEndpointWitho
     public abstract Task HandleAsync(HttpContext httpContext, TRequest request, CancellationToken cancellationToken);
 
     public virtual IResult Validate(TRequest request) => Results.Ok();
+}
+
+public delegate Task RequestHandlerDelegate(CancellationToken cancellationToken = default);
+public delegate Task<TResponse> RequestHandlerDelegate<TResponse>(CancellationToken cancellationToken = default);
+
+public delegate Task<TResponse> PipelineHandlerDelegate<TRequest, TResponse>(HttpContext httpContext, TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken);
+
+public interface ISlimEndpointPipeline<in TRequest, TResponse>
+{
+    Task<TResponse> HandleAsync(HttpContext httpContext, TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken);
+}
+
+public abstract class SlimEndpointPipeline<TRequest, TResponse> : ISlimEndpointPipeline<TRequest, TResponse>
+{
+    public abstract Task<TResponse> HandleAsync(HttpContext httpContext, TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken);
 }
 
 public record Unit { }

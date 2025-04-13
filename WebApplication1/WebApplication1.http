@@ -22,7 +22,7 @@ Accept: application/json
 
 ###
 
-POST {{WebApplication1_HostAddress}}/weatherforecast/update 
+POST {{WebApplication1_HostAddress}}/weatherforecast/update
 Content-Type: application/json
 
 {

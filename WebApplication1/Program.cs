@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Scalar.AspNetCore;
-using SlimEndpoints.AOT;
 using WebApplication1;
 
 internal class Program
@@ -19,6 +17,7 @@ internal class Program
         builder.Services.AddMemoryCache();
 
         builder.Services.AddSlimEndpoints();
+
         builder.Services.AddAntiforgery();
         builder.Services.ConfigureHttpJsonOptions(options =>
         {

@@ -460,3 +460,21 @@ app.MapGroup("/products")
 
 
 ```
+
+## Pipelines
+
+Implementing pipelines is a easy way to implement cross cutting concerns like logging, metrics, etc.
+
+```csharp
+[SlimEndpointPipeline(order: 1)] //Use order to define the order of execution
+public class LogRequest<TRequest, TResponse>(ILogger<LogRequest<TRequest, TResponse>> logger) : SlimEndpointPipeline<TRequest, TResponse>
+{
+    public override async Task<TResponse> HandleAsync(HttpContext httpContext, TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Request: {Request}", request);
+        var response = await next(cancellationToken);
+        logger.LogInformation("Response: {Response}", response);
+        return response;
+    }
+}
+```

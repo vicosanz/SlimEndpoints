@@ -167,5 +167,18 @@ namespace SlimEndpoints.AOT.Generator
             
             return false;
         }
+
+        public static string GetFullQualifiedName(this TypeSyntax typeSyntax, SemanticModel semanticModel)
+        {
+            return semanticModel.GetSymbolInfo(typeSyntax).Symbol switch
+            {
+                ITypeSymbol typeSymbol => typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                INamespaceSymbol namespaceSymbol => namespaceSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                IMethodSymbol methodSymbol => methodSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                IPropertySymbol propertySymbol => propertySymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                IEventSymbol eventSymbol => eventSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                _ => string.Empty
+            };
+        }
     }
 }

@@ -16,7 +16,7 @@
                 usings.Add(data.Namespace);
             }
 
-            foreach (var @using in usings.Distinct())
+            foreach (var @using in usings.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct())
             {
                 WriteLine($"using {@using};");
             }
