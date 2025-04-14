@@ -20,4 +20,5 @@ namespace WebApplication1;
 [JsonSerializable(typeof(Endpoints.Products.Upload.UploadDataReturn))]
 [JsonSerializable(typeof(IFormFile))]
 [JsonSerializable(typeof(Endpoints.UserNameClaim?))]
+[JsonSerializable(typeof(Microsoft.AspNetCore.Http.HttpValidationProblemDetails))]
 public partial class SlimJsonContext : JsonSerializerContext;

@@ -57,7 +57,10 @@ namespace SlimEndpoints.AOT.Generator
                 if ((pipeline.ConstructorParameters?.Count() ?? 0) > 0)
                 {//.Replace(typeSymbol.ToString(), $"{typeSymbol.Name}")
                     constructor = $"({string.Join(", ", pipeline.ConstructorParameters!.Value
-                        .Select(x => $"{x.Type.ToString().Replace(pipeline.Type, $"{pipeline.Name}_{metadata.Name}")} {x.Name}"))})";
+                        .Select(x => $"{x.Type.ToString()
+                            .Replace(pipeline.Type, $"{pipeline.Name}_{metadata.Name}")
+                            .Replace(pipeline.ArgumentRequest, metadata.RequestType)
+                            .Replace(pipeline.ArgumentResponse, metadata.ResponseType)} {x.Name}"))})";
                     constructorparams = $"({string.Join(", ", pipeline.ConstructorParameters.Value.Select(x => $"{x.Name}"))})";
                 }
                 WriteLine($"public class {pipeline.Name}_{metadata.Name}{constructor} : {pipeline.Name}<{metadata.RequestType}, {metadata.ResponseType}>{constructorparams};");

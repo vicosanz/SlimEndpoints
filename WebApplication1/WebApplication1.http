@@ -42,7 +42,7 @@ GET {{WebApplication1_HostAddress}}/products/all
 Accept: application/json
 
 ###
-GET {{WebApplication1_HostAddress}}/products/byid/10?groups=1&groups=2&groups=3
+GET {{WebApplication1_HostAddress}}/products/byid/0?groups=1&groups=2&groups=3
 Accept: application/json
 
 ###

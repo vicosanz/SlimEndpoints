@@ -15,5 +15,7 @@ namespace SlimEndpoints.AOT.Generator
         public INamedTypeSymbol TypeSymbol { get; internal set; } = null!;
         public int Order { get; internal set; }
         public ImmutableArray<IParameterSymbol>? ConstructorParameters { get; internal set; }
+        public string ArgumentRequest { get; internal set; } = null!;
+        public string ArgumentResponse { get; internal set; } = null!;
     }
 }

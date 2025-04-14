@@ -477,4 +477,23 @@ public class LogRequest<TRequest, TResponse>(ILogger<LogRequest<TRequest, TRespo
         return response;
     }
 }
+
+[SlimEndpointPipeline(2)] //Second pipeline in execution
+public class ValidateRequest<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : SlimEndpointPipeline<TRequest, TResponse>
+{
+    public override async Task<TResponse> HandleAsync(HttpContext httpContext, TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    {
+        if (validators.Count()> 0)
+        {
+            var result = await Task.WhenAll(validators.Select(v => v.ValidateAsync(request, cancellationToken)));
+            var errors = result.SelectMany(r => r.Errors).ToList();
+            if (errors.Count > 0)
+            {
+                throw new ValidationException(errors);
+            }
+        }
+        return await next(cancellationToken);
+    }
+}
+
 ```

@@ -1,8 +1,11 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Scalar.AspNetCore;
 using WebApplication1;
+using WebApplication1.Endpoints.Products.GetById;
 
 internal class Program
 {
@@ -29,6 +32,8 @@ internal class Program
             options.SetParameterPolicy<RegexInlineRouteConstraint>("regex");
         });
 
+        builder.Services.AddTransient<IValidator<GetProductsRequest>, GetProductsRequestValidator>();
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -46,7 +51,8 @@ internal class Program
         var rootGroup = app.MapGroup("")
             .AddEndpointFilter<LogginFilter>()
             .AddEndpointFilter<ValidateRequestEndpointFilter>()
-            .ProducesProblem(StatusCodes.Status500InternalServerError);
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .ProducesValidationProblem();
 
         rootGroup
             .UseSlimEndpointsweatherforecast("/weatherforecast")
@@ -65,8 +71,21 @@ internal class Program
             exceptionapp.Run(async context =>
             {
                 var ex = context.Features.Get<IExceptionHandlerFeature>();
+                if (ex?.Error is ValidationException validation)
+                {
+                    var errors = validation.Errors
+                        .GroupBy(e => e.PropertyName)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.Select(e => e.ErrorMessage).ToArray()
+                        );
+
+                    await Results.ValidationProblem(errors, title: "Validation errors")
+                                 .ExecuteAsync(context);
+                    return;
+                }
                 await Results.Problem(title: ex?.Error?.Message ?? "Un error ha ocurrido")
-                             .ExecuteAsync(context);
+                                .ExecuteAsync(context);
             })
         );
 

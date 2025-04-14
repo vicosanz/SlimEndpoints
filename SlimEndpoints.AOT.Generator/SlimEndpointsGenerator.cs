@@ -109,8 +109,8 @@ namespace SlimEndpoints.AOT.Generator
                 {
                     continue;
                 }
-                var argument1 = typeSymbol.TypeArguments[0];
-                var argument2 = typeSymbol.TypeArguments[1];
+                var argumentRequest = typeSymbol.TypeArguments[0];
+                var argumentResponse = typeSymbol.TypeArguments[1];
 
                 var constructorParameters = typeSymbol.Constructors.FirstOrDefault()?.Parameters;
 
@@ -125,6 +125,8 @@ namespace SlimEndpoints.AOT.Generator
                     TypeSymbol = typeSymbol,
                     Order = order,
                     ConstructorParameters = constructorParameters,
+                    ArgumentRequest = argumentRequest.ToString(),
+                    ArgumentResponse = argumentResponse.ToString(),
                 });
             }
             return slimPipelines;
