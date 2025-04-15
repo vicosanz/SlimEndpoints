@@ -1,4 +1,6 @@
-﻿namespace WebApplication1
+﻿using FluentValidation.Results;
+
+namespace WebApplication1
 {
     public static class FluentValidationResultExtensions
     {
@@ -19,5 +21,14 @@
             }
             return Results.Problem(title: "An error ocurred", extensions: result.Errors.Select(x => new KeyValuePair<string, object?>(x.PropertyName, x.ErrorMessage)));
         }
+
+        public static IResult ToValidationProblem(this IEnumerable<ValidationFailure> errors) => 
+            Results.ValidationProblem(
+                errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(e => e.ErrorMessage).ToArray()
+                    ), title: "Validation errors");
     }
 }

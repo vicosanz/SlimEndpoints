@@ -1,6 +1,8 @@
-﻿namespace SlimEndpoints.AOT.Generator
+﻿using System.Linq;
+
+namespace SlimEndpoints.AOT.Generator
 {
-    internal class UseSlimEndpointsWriter(string group, List<Metadata> metadata) : AbstractWriter
+    internal class UseSlimEndpointsWriter(IEnumerable<IGrouping<string, Metadata>> groups) : AbstractWriter
     {
         public string GetCode()
         {
@@ -10,11 +12,9 @@
 
         private void WriteFile()
         {
-            List<string> usings = ["System", "System.Diagnostics.CodeAnalysis"];
-            foreach (var data in metadata)
-            {
-                usings.Add(data.Namespace);
-            }
+            List<string> usings = ["System", "System.Diagnostics.CodeAnalysis", "SlimEndpoints.AOT"];
+            usings.AddRange(
+                groups.SelectMany(group => group.Select(endpoint => endpoint.Namespace)));
 
             foreach (var @using in usings.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct())
             {
@@ -31,35 +31,33 @@
 
         private void WriteAddSlimEndpoints()
         {
-            WriteBrace($"public static class UseSlimEndpoints{group}Extensions", () =>
+            WriteBrace($"public static class UseSlimEndpointsExtensions", () =>
             {
-                WriteBrace($"public static void UseSlimEndpoints{group}(this IEndpointRouteBuilder app)", () =>
-                {
-                    WriteBrace("using (var scope = app.ServiceProvider.CreateScope())", () =>
-                    {
-                        foreach (var data in metadata)
-                        {
-                            WriteLine($"scope.ServiceProvider.GetRequiredService<{data.Name}Implementation>().UseSlimEndpoint(app);");
-                            WriteLine();
-                        }
-                    });
-                });
-                WriteLine();
-                WriteBrace($"public static IEndpointRouteBuilder UseSlimEndpoints{group}(this IEndpointRouteBuilder app, [StringSyntax(\"Route\")] string prefix)", () =>
+                WriteBrace($"public static IEndpointRouteBuilder UseSlimEndpoints(this IEndpointRouteBuilder app, string groupName, [StringSyntax(\"Route\")] string prefix)", () =>
                 {
                     WriteLine($"var group = app.MapGroup(prefix);");
                     WriteBrace("using (var scope = app.ServiceProvider.CreateScope())", () =>
                     {
-                        foreach (var data in metadata)
+                        WriteBrace($"foreach (var item in scope.ServiceProvider.GetKeyedServices<ISlimEndpointImplementation>(groupName))", ()=>
                         {
-                            WriteLine($"scope.ServiceProvider.GetRequiredService<{data.Name}Implementation>().UseSlimEndpoint(group);");
-                            WriteLine();
-                        }
+                            WriteLine($"item.UseSlimEndpoint(group);");
+                        });
                     });
                     WriteLine("return app;");
                 });
+                WriteLine();
+
+                foreach(var group in groups)
+                {
+                    WriteBrace($"public static IEndpointRouteBuilder UseSlimEndpoints{group.Key}(this IEndpointRouteBuilder app, [StringSyntax(\"Route\")] string prefix)", () =>
+                    {
+                        WriteLine($"app.UseSlimEndpoints(\"{group.Key}\", prefix);");
+                        WriteLine("return app;");
+                    });
+
+                    WriteLine();
+                }
             });
-            WriteLine();
         }
     }
 }

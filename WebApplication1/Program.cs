@@ -1,11 +1,17 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Scalar.AspNetCore;
+using SlimEndpoints.AOT;
+using System.Diagnostics.CodeAnalysis;
 using WebApplication1;
+using WebApplication1.Endpoints.Products;
 using WebApplication1.Endpoints.Products.GetById;
+using WebApplication1.Endpoints.Products.GetProducts;
+using WebApplication1.Endpoints.Products.Upload;
 
 internal class Program
 {
@@ -73,22 +79,15 @@ internal class Program
                 var ex = context.Features.Get<IExceptionHandlerFeature>();
                 if (ex?.Error is ValidationException validation)
                 {
-                    var errors = validation.Errors
-                        .GroupBy(e => e.PropertyName)
-                        .ToDictionary(
-                            g => g.Key,
-                            g => g.Select(e => e.ErrorMessage).ToArray()
-                        );
-
-                    await Results.ValidationProblem(errors, title: "Validation errors")
-                                 .ExecuteAsync(context);
+                    IResult result = validation.Errors.ToValidationProblem();
+                    await result.ExecuteAsync(context);
                     return;
                 }
-                await Results.Problem(title: ex?.Error?.Message ?? "Un error ha ocurrido")
+                await Results.Problem(title: ex?.Error?.Message ?? "Error ocurred")
                                 .ExecuteAsync(context);
             })
         );
 
         app.Run();
-    }    
+    }
 }

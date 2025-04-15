@@ -1,18 +1,20 @@
-﻿using SlimEndpoints.AOT;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using SlimEndpoints.AOT;
 
-namespace WebApplication1.Endpoints.Products.GetProducts
+namespace WebApplication1.Endpoints.Products.GetProducts;
+
+[SlimEndpoint("/all", [HttpMehotds.Get], "Products")]
+public class GetProductsHandler : SlimEndpointWithoutRequest<Results<Ok<Product[]>, BadRequest<ProblemDetails>>>
 {
-    [SlimEndpoint("/all", [HttpMehotds.Get], "Products")]
-    public class GetProductsHandler : SlimEndpointWithoutRequest<Product[]>
+    public override async Task<Results<Ok<Product[]>, BadRequest<ProblemDetails>>> HandleAsync(HttpContext httpContext, CancellationToken cancellationToken)
     {
-        public override Task<Product[]> HandleAsync(HttpContext httpContext, CancellationToken cancellationToken)
+        await Task.Delay(0, cancellationToken);
+        return TypedResults.Ok( new[]
         {
-            return Task.FromResult(new[]
-            {
-                new Product { Name = "Product 1", Price = 100 },
-                new Product { Name = "Product 2", Price = 200 },
-                new Product { Name = "Product 3", Price = 300 },
-            });
-        }
+            new Product { Name = "Product 1", Price = 100 },
+            new Product { Name = "Product 2", Price = 200 },
+            new Product { Name = "Product 3", Price = 300 },
+        });
     }
 }

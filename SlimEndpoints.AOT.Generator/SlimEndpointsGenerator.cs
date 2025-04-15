@@ -58,12 +58,12 @@ namespace SlimEndpoints.AOT.Generator
                 context.AddSource($"{compilation.Assembly.MetadataName}.AddSlimEndpoints.g.cs",
                     SourceText.From(generatorAddSlimEndpoints.GetCode(), Encoding.UTF8));
 
+                var generatorGroup = new UseSlimEndpointsWriter(groups);
+                context.AddSource($"{compilation.Assembly.MetadataName}.UseSlimEndpoints.g.cs",
+                    SourceText.From(generatorGroup.GetCode(), Encoding.UTF8));
+
                 foreach (var group in groups)
                 {
-                    var generatorGroup = new UseSlimEndpointsWriter(group.Key, [.. group]);
-                    context.AddSource($"{compilation.Assembly.MetadataName}.UseSlimEndpoints.{group.Key}.g.cs",
-                        SourceText.From(generatorGroup.GetCode(), Encoding.UTF8));
-
                     foreach (var slimEndpoint in group)
                     {
                         var generatorSlimEndpoint = new SlimEndpointsWriter(slimEndpoint, slimPipelines);
@@ -105,12 +105,13 @@ namespace SlimEndpoints.AOT.Generator
                     }
                 }
 
-                if (typeSymbol.TypeArguments.Count() != 2)
+                if (typeSymbol.TypeArguments.Count() != 3)
                 {
                     continue;
                 }
-                var argumentRequest = typeSymbol.TypeArguments[0];
-                var argumentResponse = typeSymbol.TypeArguments[1];
+                var argumentSlimEndpoint = typeSymbol.TypeArguments[0];
+                var argumentRequest = typeSymbol.TypeArguments[1];
+                var argumentResponse = typeSymbol.TypeArguments[2];
 
                 var constructorParameters = typeSymbol.Constructors.FirstOrDefault()?.Parameters;
 
@@ -125,6 +126,7 @@ namespace SlimEndpoints.AOT.Generator
                     TypeSymbol = typeSymbol,
                     Order = order,
                     ConstructorParameters = constructorParameters,
+                    ArgumentSlimEndpoint = argumentSlimEndpoint.ToString(),
                     ArgumentRequest = argumentRequest.ToString(),
                     ArgumentResponse = argumentResponse.ToString(),
                 });

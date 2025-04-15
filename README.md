@@ -422,7 +422,7 @@ app.UseExceptionHandler(exceptionapp =>
     exceptionapp.Run(async context =>
     {
         var ex = context.Features.Get<IExceptionHandlerFeature>();
-        await Results.Problem(title: ex?.Error?.Message ?? "Un error ha ocurrido")
+        await Results.Problem(title: ex?.Error?.Message ?? "Error ocurred")
             .ExecuteAsync(context);
     })
 );
@@ -467,7 +467,8 @@ Implementing pipelines is a easy way to implement cross cutting concerns like lo
 
 ```csharp
 [SlimEndpointPipeline(order: 1)] //Use order to define the order of execution
-public class LogRequest<TRequest, TResponse>(ILogger<LogRequest<TRequest, TResponse>> logger) : SlimEndpointPipeline<TRequest, TResponse>
+public class LogRequest<TSlimEndpoint, TRequest, TResponse>(ILogger<LogRequest<TSlimEndpoint, TRequest, TResponse>> logger) 
+    : SlimEndpointPipeline<TSlimEndpoint, TRequest, TResponse>
 {
     public override async Task<TResponse> HandleAsync(HttpContext httpContext, TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -479,17 +480,22 @@ public class LogRequest<TRequest, TResponse>(ILogger<LogRequest<TRequest, TRespo
 }
 
 [SlimEndpointPipeline(2)] //Second pipeline in execution
-public class ValidateRequest<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : SlimEndpointPipeline<TRequest, TResponse>
+public class ValidateRequest<TSlimEndpoint, TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) 
+    : SlimEndpointPipeline<TSlimEndpoint, TRequest, TResponse>
 {
     public override async Task<TResponse> HandleAsync(HttpContext httpContext, TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (validators.Count()> 0)
+        if (validators.Any())
         {
             var result = await Task.WhenAll(validators.Select(v => v.ValidateAsync(request, cancellationToken)));
-            var errors = result.SelectMany(r => r.Errors).ToList();
-            if (errors.Count > 0)
+            var errors = result.SelectMany(r => r.Errors);
+            if (errors.Any())
             {
-                throw new ValidationException(errors);
+                if (typeof(TResponse).IsAssignableTo(typeof(IResult))) // if TResponse admit IResult short circuit gracefully
+                {
+                    return (TResponse)errors.ToValidationProblem();
+                }
+                throw new ValidationException(errors); // Short circuit with exception
             }
         }
         return await next(cancellationToken);

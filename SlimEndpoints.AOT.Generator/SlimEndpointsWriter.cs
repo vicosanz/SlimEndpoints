@@ -59,78 +59,55 @@ namespace SlimEndpoints.AOT.Generator
                     constructor = $"({string.Join(", ", pipeline.ConstructorParameters!.Value
                         .Select(x => $"{x.Type.ToString()
                             .Replace(pipeline.Type, $"{pipeline.Name}_{metadata.Name}")
+                            .Replace(pipeline.ArgumentSlimEndpoint, metadata.NameTyped)
                             .Replace(pipeline.ArgumentRequest, metadata.RequestType)
                             .Replace(pipeline.ArgumentResponse, metadata.ResponseType)} {x.Name}"))})";
                     constructorparams = $"({string.Join(", ", pipeline.ConstructorParameters.Value.Select(x => $"{x.Name}"))})";
                 }
-                WriteLine($"public class {pipeline.Name}_{metadata.Name}{constructor} : {pipeline.Name}<{metadata.RequestType}, {metadata.ResponseType}>{constructorparams};");
+                WriteLine($"public class {pipeline.Name}_{metadata.Name}{constructor} : {pipeline.Name}<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}>{constructorparams};");
                 WriteLine();
             }
 
-            WriteBrace($"{metadata.Modifiers} class {metadata.NameTyped}Implementation({metadata.NameTyped} endpoint)", () =>
+            WriteBrace($"{metadata.Modifiers} class {metadata.NameTyped}Implementation({metadata.NameTyped} endpoint) : SlimEndpointImplementation<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}>(endpoint)", () =>
             {
                 WriteLine($"private readonly {metadata.NameTyped} endpoint = endpoint;");
                 WriteLine();
-                WriteBrace($"public void UseSlimEndpoint(IEndpointRouteBuilder app)", () =>
+                WriteBrace($"public override void UseSlimEndpoint(IEndpointRouteBuilder app)", () =>
                 {
                     WriteIdented($"var route = app.MapMethods(\"{metadata.Route}\", [\"{string.Join(", ", metadata.Verbs)}\"],", () =>
                     {
-                        WriteBracedArrowFunction($"static ([{GeneratorHelpers.FromServicesAttribute}] {metadata.NameTyped}Implementation implementation, {metadata.PropertiesWithTypeAndAnnotations}HttpContext httpContext, [Microsoft.AspNetCore.Mvc.FromServicesAttribute] IEnumerable<ISlimEndpointPipeline<{metadata.RequestType}, {metadata.ResponseType}>> pipelines, CancellationToken cancellationToken) =>", () =>
+                        WriteBracedArrowFunction($"static async ([{GeneratorHelpers.FromServicesAttribute}] SlimEndpointImplementation<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}> implementation, {metadata.PropertiesWithTypeAndAnnotations}HttpContext httpContext, [Microsoft.AspNetCore.Mvc.FromServicesAttribute] IEnumerable<SlimEndpointPipeline<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}>> pipelines, CancellationToken cancellationToken) =>", () =>
                         {
-                            WriteLine($"return implementation.HandleAsync({metadata.PropertiesNames}httpContext, pipelines, cancellationToken);");
+                            if (metadata.RequestType == "SlimEndpoints.AOT.Unit")
+                            {
+                                WriteLine("var __request__ = new SlimEndpoints.AOT.Unit();");
+                            }
+                            else
+                            {
+                                if (string.IsNullOrWhiteSpace(metadata.PropertiesParse))
+                                {
+                                    WriteLine("var __request__ = request;");
+                                }
+                                else 
+                                { 
+                                    if (metadata.IsRequestTypePositionRecord)
+                                    {
+                                        WriteLine($"var __request__ = new {metadata.RequestType}({metadata.PropertiesParse});");
+                                    }
+                                    else
+                                    {
+                                        WriteLine($"var __request__ = new {metadata.RequestType} {{{metadata.PropertiesParse}}};");
+                                    }
+                                }
+                            }
+
+                            var returnString = metadata.ResponseType == "SlimEndpoints.AOT.Unit" ? "" : "return ";
+                            WriteLine($"{returnString}await implementation.HandleAsync(httpContext, __request__, pipelines, cancellationToken);");
                         });
                     });
                     WriteLine($"endpoint.Configure(route);");
                 });
-                string handle;
-                if (metadata.ResponseType == "SlimEndpoints.AOT.Unit")
-                {
-                    handle = $"public async Task HandleAsync({metadata.PropertiesWithType}HttpContext httpContext, IEnumerable<ISlimEndpointPipeline<{metadata.RequestType}, {metadata.ResponseType}>> pipelines, CancellationToken cancellationToken)";
-                }
-                else
-                {
-                    handle = $"public async Task<{metadata.ResponseType}> HandleAsync({metadata.PropertiesWithType}HttpContext httpContext, IEnumerable<ISlimEndpointPipeline<{metadata.RequestType}, {metadata.ResponseType}>> pipelines, CancellationToken cancellationToken)";
-                }
-                WriteBrace(handle, () =>
-                {
-                    if (!(metadata.RequestType == "SlimEndpoints.AOT.Unit"))
-                    {
-                        if (!string.IsNullOrWhiteSpace(metadata.PropertiesParse))
-                        {
-                            if (metadata.IsRequestTypePositionRecord)
-                            {
-                                WriteLine($"var request = new {metadata.RequestType}({metadata.PropertiesParse});");
-                            }
-                            else
-                            {
-                                WriteLine($"var request = new {metadata.RequestType} {{{metadata.PropertiesParse}}};");
-                            }
-                        }
-                    }
-                    var returnString = metadata.ResponseType == "SlimEndpoints.AOT.Unit" ? "" : "return ";
-                    var requestString = metadata.RequestType == "SlimEndpoints.AOT.Unit" ? "" : "request, ";
-                    //WriteLine($"{returnString}await endpoint.HandleAsync(httpContext, {requestString}cancellationToken);");
-
-                    if (metadata.RequestType == "SlimEndpoints.AOT.Unit")
-                    {
-                        WriteLine("var request = new SlimEndpoints.AOT.Unit();");
-                    }
-                    if (metadata.ResponseType == "SlimEndpoints.AOT.Unit")
-                    {
-                        WriteBrace($"async Task<{metadata.ResponseType}> Handler(CancellationToken cancellationToken = default)", () =>
-                        {
-                            WriteLine($"await endpoint.HandleAsync(httpContext, {requestString}cancellationToken);");
-                            WriteLine("return new SlimEndpoints.AOT.Unit();");
-                        });
-                    }
-                    else
-                    {
-                        WriteLine($"Task<{metadata.ResponseType}> Handler(CancellationToken cancellationToken = default) => endpoint.HandleAsync(httpContext, {requestString}cancellationToken);");
-                    }
-
-                    WriteLine($"{returnString}await pipelines.Reverse().Aggregate((RequestHandlerDelegate<{metadata.ResponseType}>)Handler, (next, pipeline) => (t) => pipeline.HandleAsync(httpContext, request, next, cancellationToken)).Invoke(cancellationToken);");
-                });
-                WriteBrace($"public {metadata.RequestType} ParseRequestFromFilterContext(Microsoft.AspNetCore.Http.EndpointFilterInvocationContext context)", () =>
+                WriteBrace($"public override {metadata.RequestType} ParseRequestFromFilterContext(Microsoft.AspNetCore.Http.EndpointFilterInvocationContext context)", () =>
                 {
                     if (metadata.RequestType == "SlimEndpoints.AOT.Unit")
                     {
@@ -157,12 +134,6 @@ namespace SlimEndpoints.AOT.Generator
                     }
                     WriteLine("return request;");
                 });
-
-                WriteLine();
-                WriteLine($"public IResult ValidateRequest({metadata.RequestType} request) => endpoint.Validate(request);");
-
-                WriteLine();
-                WriteLine("public IResult ValidateFromFilterContext(Microsoft.AspNetCore.Http.EndpointFilterInvocationContext context) => ValidateRequest(ParseRequestFromFilterContext(context));");
             });
             WriteLine();
         }
