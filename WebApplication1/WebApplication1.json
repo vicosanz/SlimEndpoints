@@ -118,7 +118,7 @@
           "500": {
             "description": "Internal Server Error",
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }

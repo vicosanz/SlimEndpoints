@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,10 +14,16 @@ namespace SlimEndpoints.AOT.Generator
     {
         private static readonly string slimEndpointAttribute = "SlimEndpoints.AOT.SlimEndpointAttribute";
         private static readonly string iSlimEndpointType = "SlimEndpoint<";
-        private static readonly string iSlimEndpointWithoutRequest = "SlimEndpointWithoutRequest<";
+        private static readonly string iSlimEndpointProduceType = "SlimEndpointProduce<";
+
+        private static readonly string iSlimEndpointWithoutRequestType = "SlimEndpointWithoutRequest<";
+        private static readonly string iSlimEndpointWithoutRequestProduceType = "SlimEndpointWithoutRequestProduce<";
+
         private static readonly string iSlimEndpointWithoutResponse = "SlimEndpointWithoutResponse<";
         private static readonly string slimEndpointPipelineAttribute = "SlimEndpoints.AOT.SlimEndpointPipelineAttribute";
         private static readonly string iSlimEndpointPipelineType = "SlimEndpointPipeline<";
+        private static readonly string unit = "SlimEndpoints.AOT.Unit";
+        private static readonly string iResult = "Microsoft.AspNetCore.Http.IResult";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -151,8 +158,9 @@ namespace SlimEndpoints.AOT.Generator
                 string modifiers = type.GetModifiers();
 
                 TypeSyntax? requestTypeSyntax = null;
-                string requestType = "SlimEndpoints.AOT.Unit";
-                string responseType = "SlimEndpoints.AOT.Unit";
+                string requestType = unit;
+                string responseType = unit;
+                string? produceType = null;
                 string? requestTypeKind = null;
                 bool isRequestTypePositionRecord = false;
 
@@ -165,15 +173,26 @@ namespace SlimEndpoints.AOT.Generator
                             var argumentsType = (GenericNameSyntax)baseType.Type;
                             requestTypeSyntax = argumentsType.TypeArgumentList.Arguments[0];
                             requestType = requestTypeSyntax.GetFullQualifiedName(semanticModel);
-                            if (argumentsType.TypeArgumentList.Arguments.Count > 1)
-                            {
-                                responseType = argumentsType.TypeArgumentList.Arguments[1].GetFullQualifiedName(semanticModel);
-                            }
+                            responseType = argumentsType.TypeArgumentList.Arguments[1].GetFullQualifiedName(semanticModel);
                         }
-                        else if (baseType.ToFullString().Contains(iSlimEndpointWithoutRequest))
+                        else if (baseType.ToFullString().Contains(iSlimEndpointProduceType))
+                        {
+                            var argumentsType = (GenericNameSyntax)baseType.Type;
+                            requestTypeSyntax = argumentsType.TypeArgumentList.Arguments[0];
+                            requestType = requestTypeSyntax.GetFullQualifiedName(semanticModel);
+                            produceType = argumentsType.TypeArgumentList.Arguments[1].GetFullQualifiedName(semanticModel);
+                            responseType = iResult;
+                        }
+                        else if (baseType.ToFullString().Contains(iSlimEndpointWithoutRequestType))
                         {
                             var argumentsType = (GenericNameSyntax)baseType.Type;
                             responseType = argumentsType.TypeArgumentList.Arguments[0].GetFullQualifiedName(semanticModel);
+                        }
+                        else if (baseType.ToFullString().Contains(iSlimEndpointWithoutRequestProduceType))
+                        {
+                            var argumentsType = (GenericNameSyntax)baseType.Type;
+                            produceType = argumentsType.TypeArgumentList.Arguments[0].GetFullQualifiedName(semanticModel);
+                            responseType = iResult;
                         }
                         else if (baseType.ToFullString().Contains(iSlimEndpointWithoutResponse))
                         {
@@ -188,7 +207,7 @@ namespace SlimEndpoints.AOT.Generator
                 bool createAuxiliarBodyRequestClass = false;
                 bool useAuxiliarBodyRequestClass = false;
 
-                if (requestType != "SlimEndpoints.AOT.Unit")
+                if (requestType != unit)
                 {
                     var requestTypeSymbol = semanticModel.GetTypeInfo(requestTypeSyntax!).Type;
                     if (requestTypeSymbol is null)
@@ -431,6 +450,7 @@ namespace SlimEndpoints.AOT.Generator
                                         typeSymbol.ToString(),
                                         modifiers,
                                         requestType,
+                                        produceType,
                                         responseType,
                                         requestTypeKind,
                                         isRequestTypePositionRecord,

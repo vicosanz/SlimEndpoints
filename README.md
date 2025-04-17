@@ -65,6 +65,26 @@ public class GetProducts : SlimEndpointWithoutRequest<Product[]>
     }
 }
 
+// Using SlimEndpointWithoutRequestProduce instead of SlimEndpointWithoutRequest enable HandleAsync response as IResult 
+// but registering builder.Produces<Product[]>(StatusCodes.Status200OK);
+// SlimEndpoint<TRequest, TResponse> alsi has a shorhand SlimEndpointProduce with the same behaviour
+
+[SlimEndpoint("/all", HttpMehotds.Get, "Products")]
+public class GetProducts : SlimEndpointWithoutRequestProduce<Product[]>
+{
+    // This code is added in the implementation automatically
+    // public override void Configure(RouteHandlerBuilder builder)
+    // {
+    //     builder.Produces<Product[]>(StatusCodes.Status200OK);
+    // }
+
+    public override Task<IResult> HandleAsync(HttpContext httpContext, CancellationToken cancellationToken)
+    {
+        ...
+    }
+}
+
+
 // Endpoints/Products/GetById/GetByIdHandler.cs
 [SlimEndpoint("/byid/{id}", HttpMehotds.Get, "Products")]
 public class GetProductByIdHandler : SlimEndpoint<GetProductsRequest, Product>

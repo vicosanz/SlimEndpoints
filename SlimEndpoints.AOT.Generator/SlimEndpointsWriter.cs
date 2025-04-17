@@ -105,6 +105,10 @@ namespace SlimEndpoints.AOT.Generator
                             WriteLine($"{returnString}await implementation.HandleAsync(httpContext, __request__, pipelines, cancellationToken);");
                         });
                     });
+                    if (metadata.ProduceType != null)
+                    {
+                        WriteLine($"route.Produces<{metadata.ProduceType}>(StatusCodes.Status200OK);");
+                    }
                     WriteLine($"endpoint.Configure(route);");
                 });
                 WriteBrace($"public override {metadata.RequestType} ParseRequestFromFilterContext(Microsoft.AspNetCore.Http.EndpointFilterInvocationContext context)", () =>

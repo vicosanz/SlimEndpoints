@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 namespace WebApplication1.Endpoints.Products.GetById
 {
     [SlimEndpoint("/byid/{id}", [HttpMehotds.Get], group: "Products")]
-    public class GetProductByIdHandler : SlimEndpoint<GetProductsRequest, IResult>
+    public class GetProductByIdHandler : SlimEndpointProduce<GetProductsRequest, Product>
     {
         //public override IResult Validate(GetProductsRequest request)
         //{
@@ -16,14 +16,14 @@ namespace WebApplication1.Endpoints.Products.GetById
         //}
         public override void Configure(RouteHandlerBuilder builder)
         {
-            builder.Produces<Product>(StatusCodes.Status200OK);
+            //builder.Produces<Product>(StatusCodes.Status200OK);
         }
 
         public override async Task<IResult> HandleAsync(HttpContext httpContext, GetProductsRequest request, CancellationToken cancellationToken)
         {
             await Task.Delay(0, cancellationToken);
             httpContext.TryGetRequestQueryValues<int>("groups", out var groups);
-            return TypedResults.Ok(new Product { Name = "Product 1", Price = 100 });
+            return Results.Ok(new Product { Name = "Product 1", Price = 100 });
         }
     }
 }

@@ -24,6 +24,7 @@ namespace SlimEndpoints.AOT.Generator
                            string FullName,
                            string Modifiers,
                            string RequestType,
+                           string? ProduceType,
                            string ResponseType,
                            string? RequestTypeKind,
                            bool IsRequestTypePositionRecord,
@@ -82,6 +83,7 @@ namespace SlimEndpoints.AOT.Generator
         /// All types of the ComplexTypes configured
         /// </summary>
         public string RequestType { get; internal set; } = RequestType;
+        public string ProduceType { get; internal set; } = ProduceType;
 
         /// <summary>
         /// All base types of the ComplexTypes configured

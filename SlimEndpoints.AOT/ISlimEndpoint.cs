@@ -32,6 +32,8 @@ public abstract class SlimEndpoint<TRequest, TResponse> : ISlimEndpoint<TRequest
     public virtual IResult Validate(TRequest request) => Results.Ok();
 }
 
+public abstract class SlimEndpointProduce<TRequest, TProduce> : SlimEndpoint<TRequest, IResult>;
+
 public abstract class SlimEndpointWithoutRequest<TResponse> : ISlimEndpointWithoutRequest<TResponse>
 {
     public virtual void Configure(RouteHandlerBuilder builder) { }
@@ -41,6 +43,8 @@ public abstract class SlimEndpointWithoutRequest<TResponse> : ISlimEndpointWitho
 
     public virtual IResult Validate(Unit request) => Results.Ok();
 }
+
+public abstract class SlimEndpointWithoutRequestProduce<TProduce> : SlimEndpointWithoutRequest<IResult>;
 
 public abstract class SlimEndpointWithoutResponse<TRequest> : ISlimEndpointWithoutResponse<TRequest> 
 {

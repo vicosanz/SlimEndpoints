@@ -6,10 +6,7 @@ namespace WebApplication1.Endpoints;
 
 [SlimEndpoint("", [HttpMehotds.Get], "weatherforecast")]
 public class GetWeatherForecasts :
-    SlimEndpointWithoutRequest<
-        Results<
-            Ok<List<WeatherForecast>>,
-            InternalServerError<ProblemDetails>>>
+    SlimEndpointWithoutRequestProduce<List<WeatherForecast>>
 {
     private static readonly string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
@@ -17,9 +14,10 @@ public class GetWeatherForecasts :
     {
         builder
             .AllowAnonymous();
+        builder.Produces<List<WeatherForecast>>(StatusCodes.Status200OK);
     }
 
-    public override async Task<Results<Ok<List<WeatherForecast>>, InternalServerError<ProblemDetails>>> 
+    public override async Task<IResult> 
         HandleAsync(HttpContext httpContext, CancellationToken cancellationToken)
     {
         await Task.Delay(0, cancellationToken);
