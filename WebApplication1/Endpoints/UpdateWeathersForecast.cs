@@ -28,7 +28,7 @@ public class UpdateWeatherForecastsRequestValidator : AbstractValidator<UpdateWe
     }
 }
 
-[SlimEndpoint("/update", [HttpMehotds.Post], "weatherforecast")]
+[SlimEndpoint("/update", [SlimEndpoints.AOT.HttpMethods.Post], "weatherforecast")]
 public partial class UpdateWeatherForecasts :
     SlimEndpoint<UpdateWeatherForecastsRequest,
         Results<

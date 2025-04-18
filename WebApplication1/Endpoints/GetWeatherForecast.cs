@@ -17,7 +17,7 @@ public class GetWeatherForecastRequest
     public string? accept { get; set; }
 }
 
-[SlimEndpoint("/{Id}", [HttpMehotds.Get], "weatherforecast")]
+[SlimEndpoint("/{Id}", [SlimEndpoints.AOT.HttpMethods.Get], "weatherforecast")]
 public class GetWeatherForecast(IMemoryCache memoryCache) :
     SlimEndpoint<GetWeatherForecastRequest,
         Results<

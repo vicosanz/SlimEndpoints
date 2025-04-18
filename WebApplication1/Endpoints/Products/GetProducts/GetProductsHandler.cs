@@ -4,7 +4,7 @@ using SlimEndpoints.AOT;
 
 namespace WebApplication1.Endpoints.Products.GetProducts;
 
-[SlimEndpoint("/all", [HttpMehotds.Get], "Products")]
+[SlimEndpoint("/all", [SlimEndpoints.AOT.HttpMethods.Get], "Products")]
 public class GetProductsHandler : SlimEndpointWithoutRequest<Results<Ok<Product[]>, BadRequest<ProblemDetails>>>
 {
     public override async Task<Results<Ok<Product[]>, BadRequest<ProblemDetails>>> HandleAsync(HttpContext httpContext, CancellationToken cancellationToken)

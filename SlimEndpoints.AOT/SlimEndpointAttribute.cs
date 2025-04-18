@@ -7,6 +7,6 @@ namespace SlimEndpoints.AOT;
 public class SlimEndpointAttribute([StringSyntax("Route")] string route, string[] verbs, string group) : Attribute
 {
     private readonly string route = route;
-    private readonly string[] verbs = verbs.Length == 0 ? [HttpMehotds.Get] : verbs;
+    private readonly string[] verbs = verbs.Length == 0 ? [HttpMethods.Get] : verbs;
     private readonly string group = group;
 }

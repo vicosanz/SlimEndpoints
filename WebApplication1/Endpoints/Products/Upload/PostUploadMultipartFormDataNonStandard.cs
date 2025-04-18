@@ -42,7 +42,7 @@ public record UploadData(string name = "", string description = "")
 
 public record UploadDataReturn(string name = "", string description = "", string fileText = "");
 
-[SlimEndpoint("/upload/{id:int}", [HttpMehotds.Post], group: "Products")]
+[SlimEndpoint("/upload/{id:int}", [SlimEndpoints.AOT.HttpMethods.Post], group: "Products")]
 public class PostUploadMultipartFormDataNonStandard(IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions> jsonOptions) : SlimEndpoint<PostUploadRequest, IResult>
 {
     public override void Configure(RouteHandlerBuilder builder)
@@ -92,7 +92,7 @@ public class PostUploadMultipartFormDataNonStandard(IOptions<Microsoft.AspNetCor
     }
 }
 
-[SlimEndpoint("/uploadbinding/{id:int}", [HttpMehotds.Post], group: "Products")]
+[SlimEndpoint("/uploadbinding/{id:int}", [SlimEndpoints.AOT.HttpMethods.Post], group: "Products")]
 public class PostUploadMultipartFormDataNonStandardBinding1 : 
     SlimEndpoint<PostUploadBindingRequest, IResult>
 {

@@ -1,6 +1,6 @@
 ﻿namespace SlimEndpoints.AOT;
 
-public static class HttpMehotds
+public static class HttpMethods
 {
     public const string Get = "Get";
     public const string Post = "Post";

@@ -16,7 +16,7 @@ namespace WebApplication1.Endpoints.Products.Upload
         //public IAntiforgery antiforgery { get; set; }
     }
 
-    [SlimEndpoint("/uploadStd/{id:int}", [HttpMehotds.Post], group: "Products")]
+    [SlimEndpoint("/uploadStd/{id:int}", [SlimEndpoints.AOT.HttpMethods.Post], group: "Products")]
     public class PostUploadMultipartFormDataStandard : SlimEndpoint<PostUploadStdRequest, IResult>
     {
         public override void Configure(RouteHandlerBuilder builder)

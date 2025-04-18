@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace WebApplication1.Endpoints.Products.GetById
 {
-    [SlimEndpoint("/byid/{id}", [HttpMehotds.Get], group: "Products")]
+    [SlimEndpoint("/byid/{id}", [SlimEndpoints.AOT.HttpMethods.Get], group: "Products")]
     public class GetProductByIdHandler : SlimEndpointProduce<GetProductsRequest, Product>
     {
         //public override IResult Validate(GetProductsRequest request)

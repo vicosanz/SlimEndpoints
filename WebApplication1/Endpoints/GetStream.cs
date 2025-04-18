@@ -3,7 +3,7 @@ using System.Text;
 
 namespace WebApplication1.Endpoints;
 
-[SlimEndpoint("/stream/{id:int}", [HttpMehotds.Get], group: "weatherforecast")]
+[SlimEndpoint("/stream/{id:int}", [SlimEndpoints.AOT.HttpMethods.Get], group: "weatherforecast")]
 public class GetStream : SlimEndpointWithoutResponse<GetStreamRequest>
 {
     public override async Task HandleAsync(HttpContext httpContext, GetStreamRequest request, CancellationToken cancellationToken)

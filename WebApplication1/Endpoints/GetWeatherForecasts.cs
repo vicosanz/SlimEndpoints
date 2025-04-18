@@ -4,7 +4,7 @@ using SlimEndpoints.AOT;
 
 namespace WebApplication1.Endpoints;
 
-[SlimEndpoint("", [HttpMehotds.Get], "weatherforecast")]
+[SlimEndpoint("", [SlimEndpoints.AOT.HttpMethods.Get], "weatherforecast")]
 public class GetWeatherForecasts :
     SlimEndpointWithoutRequestProduce<List<WeatherForecast>>
 {

@@ -14,7 +14,7 @@ public class UpdateWeatherForecastRequest
     public UpdateWeatherForecastsRequestBase? Values { get; set; }
 }
 
-[SlimEndpoint("/update/{Id}", [HttpMehotds.Post], "weatherforecast")]
+[SlimEndpoint("/update/{Id}", [SlimEndpoints.AOT.HttpMethods.Post], "weatherforecast")]
 public class UpdateWeatherForecast :
     SlimEndpoint<UpdateWeatherForecastRequest,
         Results<
