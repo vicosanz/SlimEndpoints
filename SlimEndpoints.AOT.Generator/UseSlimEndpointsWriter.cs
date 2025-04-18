@@ -12,7 +12,7 @@ namespace SlimEndpoints.AOT.Generator
 
         private void WriteFile()
         {
-            List<string> usings = ["System", "System.Diagnostics.CodeAnalysis", "SlimEndpoints.AOT"];
+            List<string> usings = ["System", "System.Diagnostics.CodeAnalysis", "Microsoft.AspNetCore.Builder", "Microsoft.AspNetCore.Http", "Microsoft.AspNetCore.Routing", "SlimEndpoints.AOT"];
             usings.AddRange(
                 groups.SelectMany(group => group.Select(endpoint => endpoint.Namespace)));
 

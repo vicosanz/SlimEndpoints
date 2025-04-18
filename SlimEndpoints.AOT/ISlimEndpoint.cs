@@ -32,6 +32,8 @@ public abstract class SlimEndpoint<TRequest, TResponse> : ISlimEndpoint<TRequest
     public virtual IResult Validate(TRequest request) => Results.Ok();
 }
 
+public abstract class SlimEndpoint<TRequest> : SlimEndpoint<TRequest, IResult>;
+
 public abstract class SlimEndpointProduce<TRequest, TProduce> : SlimEndpoint<TRequest, IResult>;
 
 public abstract class SlimEndpointWithoutRequest<TResponse> : ISlimEndpointWithoutRequest<TResponse>

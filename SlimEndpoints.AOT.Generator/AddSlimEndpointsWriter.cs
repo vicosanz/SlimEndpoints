@@ -12,7 +12,7 @@ namespace SlimEndpoints.AOT.Generator
 
         private void WriteFile()
         {
-            List<string> usings = ["System", "SlimEndpoints.AOT"];
+            List<string> usings = ["System", "Microsoft.AspNetCore.Builder", "Microsoft.AspNetCore.Http", "Microsoft.AspNetCore.Routing", "SlimEndpoints.AOT"];
             foreach (var data in metadata)
             {
                 usings.AddRange(data.Usings);

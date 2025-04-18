@@ -173,7 +173,14 @@ namespace SlimEndpoints.AOT.Generator
                             var argumentsType = (GenericNameSyntax)baseType.Type;
                             requestTypeSyntax = argumentsType.TypeArgumentList.Arguments[0];
                             requestType = requestTypeSyntax.GetFullQualifiedName(semanticModel);
-                            responseType = argumentsType.TypeArgumentList.Arguments[1].GetFullQualifiedName(semanticModel);
+                            if (argumentsType.TypeArgumentList.Arguments.Count() > 1)
+                            {
+                                responseType = argumentsType.TypeArgumentList.Arguments[1].GetFullQualifiedName(semanticModel);
+                            }
+                            else
+                            {
+                                responseType = iResult;
+                            }
                         }
                         else if (baseType.ToFullString().Contains(iSlimEndpointProduceType))
                         {

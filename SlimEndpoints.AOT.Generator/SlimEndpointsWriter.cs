@@ -12,7 +12,7 @@ namespace SlimEndpoints.AOT.Generator
 
         private void WriteFile()
         {
-            List<string> usings = ["System", "Microsoft.AspNetCore.Mvc"];
+            List<string> usings = ["System", "Microsoft.AspNetCore.Builder", "Microsoft.AspNetCore.Http", "Microsoft.AspNetCore.Routing", "Microsoft.AspNetCore.Mvc"];
             usings = [.. usings, .. metadata.Usings];
             foreach (Pipeline pipeline in slimPipelines)
             {
