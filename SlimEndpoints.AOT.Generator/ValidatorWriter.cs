@@ -10,7 +10,7 @@
 
         private void WriteFile()
         {
-            List<string> usings = ["System", "Microsoft.AspNetCore.Http.HttpResults"];
+            List<string> usings = ["System", "Microsoft.AspNetCore.Builder", "Microsoft.AspNetCore.Http", "Microsoft.AspNetCore.Routing", "Microsoft.AspNetCore.Http.HttpResults"];
             foreach (var data in metadata)
             {
                 usings.Add(data.Namespace);
