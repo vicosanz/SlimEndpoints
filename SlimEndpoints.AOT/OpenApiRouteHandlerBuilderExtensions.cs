@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿#if NET8_0
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace SlimEndpoints.AOT;
+namespace Microsoft.AspNetCore.Builder;
 
-#if NET8_0
 public static class OpenApiRouteHandlerBuilderExtensions
 {
     private static readonly string ProblemDetailsContentType = "application/problem+json";

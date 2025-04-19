@@ -46,6 +46,7 @@ namespace SlimEndpoints.AOT.Generator
                     foreach (var data in metadata)
                     {
                         WriteLine($"services.AddScoped<{data.Name}>();");
+                        WriteLine($"services.AddScoped<{data.Name}Implementation>();");
                         WriteLine($"services.AddScoped<SlimEndpointImplementation<{data.NameTyped}, {data.RequestType}, {data.ResponseType}>, {data.Name}Implementation>();");
                         WriteLine($"services.AddKeyedScoped<ISlimEndpointImplementation, {data.Name}Implementation>(\"{data.Group}\");");
                         foreach (var pipeline in slimPipelines)
