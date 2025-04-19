@@ -33,9 +33,13 @@ namespace SlimEndpoints.AOT.Generator
         {
             WriteBrace($"public static class UseSlimEndpointsExtensions", () =>
             {
-                WriteBrace($"public static IEndpointRouteBuilder UseSlimEndpoints(this IEndpointRouteBuilder app, string groupName, [StringSyntax(\"Route\")] string prefix)", () =>
+                WriteBrace($"public static IEndpointRouteBuilder UseSlimEndpoints(this IEndpointRouteBuilder app, string groupName, [StringSyntax(\"Route\")] string prefix, string? tag = null)", () =>
                 {
                     WriteLine($"var group = app.MapGroup(prefix);");
+                    WriteBrace("if (tag != null)", () =>
+                    {
+                        WriteLine($"group.WithTags(tag);");
+                    });
                     WriteBrace("using (var scope = app.ServiceProvider.CreateScope())", () =>
                     {
                         WriteBrace($"foreach (var item in scope.ServiceProvider.GetKeyedServices<ISlimEndpointImplementation>(groupName))", ()=>
@@ -49,9 +53,9 @@ namespace SlimEndpoints.AOT.Generator
 
                 foreach(var group in groups)
                 {
-                    WriteBrace($"public static IEndpointRouteBuilder UseSlimEndpoints{group.Key}(this IEndpointRouteBuilder app, [StringSyntax(\"Route\")] string prefix)", () =>
+                    WriteBrace($"public static IEndpointRouteBuilder UseSlimEndpoints{group.Key}(this IEndpointRouteBuilder app, [StringSyntax(\"Route\")] string prefix, string? tag = null)", () =>
                     {
-                        WriteLine($"app.UseSlimEndpoints(\"{group.Key}\", prefix);");
+                        WriteLine($"app.UseSlimEndpoints(\"{group.Key}\", prefix, tag);");
                         WriteLine("return app;");
                     });
 

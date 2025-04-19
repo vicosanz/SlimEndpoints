@@ -8,7 +8,7 @@
     "/weatherforecast/stream/{id}": {
       "get": {
         "tags": [
-          "WebApplication1"
+          "Weather Forecast"
         ],
         "parameters": [
           {
@@ -51,7 +51,7 @@
     "/weatherforecast/{Id}": {
       "get": {
         "tags": [
-          "WebApplication1"
+          "Weather Forecast"
         ],
         "operationId": "xxx",
         "parameters": [
@@ -112,7 +112,7 @@
     "/weatherforecast": {
       "get": {
         "tags": [
-          "WebApplication1"
+          "Weather Forecast"
         ],
         "responses": {
           "500": {
@@ -154,7 +154,7 @@
     "/weatherforecast/update/{Id}": {
       "post": {
         "tags": [
-          "WebApplication1"
+          "Weather Forecast"
         ],
         "parameters": [
           {
@@ -214,7 +214,7 @@
     "/weatherforecast/update": {
       "post": {
         "tags": [
-          "WebApplication1"
+          "Weather Forecast"
         ],
         "requestBody": {
           "content": {
@@ -263,7 +263,7 @@
     "/products/byid/{id}": {
       "get": {
         "tags": [
-          "WebApplication1"
+          "Products"
         ],
         "parameters": [
           {
@@ -313,7 +313,7 @@
     "/products/all": {
       "get": {
         "tags": [
-          "WebApplication1"
+          "Products"
         ],
         "responses": {
           "500": {
@@ -355,7 +355,7 @@
     "/products/slug2/{slug}": {
       "post": {
         "tags": [
-          "WebApplication1"
+          "Products"
         ],
         "parameters": [
           {
@@ -407,7 +407,7 @@
     "/products/slug/{slug}": {
       "post": {
         "tags": [
-          "WebApplication1"
+          "Products"
         ],
         "parameters": [
           {
@@ -459,7 +459,7 @@
     "/products/upload/{id}": {
       "post": {
         "tags": [
-          "WebApplication1"
+          "Products"
         ],
         "parameters": [
           {
@@ -502,7 +502,7 @@
     "/products/uploadbinding/{id}": {
       "post": {
         "tags": [
-          "WebApplication1"
+          "Products"
         ],
         "parameters": [
           {
@@ -563,7 +563,7 @@
     "/products/uploadStd/{id}": {
       "post": {
         "tags": [
-          "WebApplication1"
+          "Products"
         ],
         "parameters": [
           {
@@ -824,6 +824,12 @@
     }
   },
   "tags": [
+    {
+      "name": "Weather Forecast"
+    },
+    {
+      "name": "Products"
+    },
     {
       "name": "WebApplication1"
     }

@@ -68,7 +68,7 @@ namespace SlimEndpoints.AOT.Generator
                 WriteLine();
             }
 
-            WriteBrace($"{metadata.Modifiers} class {metadata.NameTyped}Implementation({metadata.NameTyped} endpoint) : SlimEndpointImplementation<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}>(endpoint)", () =>
+            WriteBrace($"{metadata.Modifiers} class {metadata.NameTyped}Implementation({metadata.NameTyped} endpoint, IEnumerable<SlimEndpointPipeline<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}>> pipelines) : SlimEndpointImplementation<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}>(endpoint, pipelines)", () =>
             {
                 WriteLine($"private readonly {metadata.NameTyped} endpoint = endpoint;");
                 WriteLine();
@@ -76,7 +76,7 @@ namespace SlimEndpoints.AOT.Generator
                 {
                     WriteIdented($"var route = app.MapMethods(\"{metadata.Route}\", [\"{string.Join(", ", metadata.Verbs)}\"],", () =>
                     {
-                        WriteBracedArrowFunction($"static async ([{GeneratorHelpers.FromServicesAttribute}] SlimEndpointImplementation<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}> implementation, {metadata.PropertiesWithTypeAndAnnotations}HttpContext httpContext, [Microsoft.AspNetCore.Mvc.FromServicesAttribute] IEnumerable<SlimEndpointPipeline<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}>> pipelines, CancellationToken cancellationToken) =>", () =>
+                        WriteBracedArrowFunction($"static async ([{GeneratorHelpers.FromServicesAttribute}] SlimEndpointImplementation<{metadata.NameTyped}, {metadata.RequestType}, {metadata.ResponseType}> implementation, {metadata.PropertiesWithTypeAndAnnotations}HttpContext httpContext, CancellationToken cancellationToken) =>", () =>
                         {
                             if (metadata.RequestType == "SlimEndpoints.AOT.Unit")
                             {
@@ -102,7 +102,7 @@ namespace SlimEndpoints.AOT.Generator
                             }
 
                             var returnString = metadata.ResponseType == "SlimEndpoints.AOT.Unit" ? "" : "return ";
-                            WriteLine($"{returnString}await implementation.HandleAsync(httpContext, __request__, pipelines, cancellationToken);");
+                            WriteLine($"{returnString}await implementation.HandleAsync(httpContext, __request__, cancellationToken);");
                         });
                     });
                     if (metadata.ProduceType != null)

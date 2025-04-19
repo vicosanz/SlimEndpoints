@@ -61,8 +61,8 @@ internal class Program
             .ProducesValidationProblem();
 
         rootGroup
-            .UseSlimEndpointsweatherforecast("/weatherforecast")
-            .UseSlimEndpointsProducts("/products");
+            .UseSlimEndpointsweatherforecast("/weatherforecast", "Weather Forecast")
+            .UseSlimEndpointsProducts("/products", "Products");
 
         rootGroup.MapGet("/generate-antiforgery-token", (IAntiforgery antiforgery, HttpContext httpContext) =>
         {

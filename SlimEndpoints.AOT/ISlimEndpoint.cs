@@ -89,7 +89,9 @@ public interface ISlimEndpointImplementation<TSlimEndpoint, TRequest, TResponse>
     IResult ValidateFromFilterContext(EndpointFilterInvocationContext context);
 }
 
-public abstract class SlimEndpointImplementation<TSlimEndpoint, TRequest, TResponse>(TSlimEndpoint slimEndpoint) :
+public abstract class SlimEndpointImplementation<TSlimEndpoint, TRequest, TResponse>(
+    TSlimEndpoint slimEndpoint, 
+    IEnumerable<SlimEndpointPipeline<TSlimEndpoint, TRequest, TResponse>> pipelines) :
     ISlimEndpointImplementation<TSlimEndpoint, TRequest, TResponse> where TSlimEndpoint: ISlimEndpoint<TRequest, TResponse>
 {
     protected readonly TSlimEndpoint slimEndpoint = slimEndpoint;
@@ -97,8 +99,7 @@ public abstract class SlimEndpointImplementation<TSlimEndpoint, TRequest, TRespo
     public abstract void UseSlimEndpoint(IEndpointRouteBuilder app);
 
     public async Task<TResponse> HandleAsync(HttpContext httpContext,         
-        TRequest request,
-        IEnumerable<SlimEndpointPipeline<TSlimEndpoint, TRequest, TResponse>> pipelines, 
+        TRequest request, 
         CancellationToken cancellationToken)
     {
         Task<TResponse> Handler(CancellationToken cancellationToken = default) => slimEndpoint.HandleAsync(httpContext, request, cancellationToken);
