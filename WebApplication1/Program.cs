@@ -58,6 +58,7 @@ internal class Program
             .AddEndpointFilter<LogginFilter>()
             .AddEndpointFilter<ValidateRequestEndpointFilter>()
             .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .Produces(StatusCodes.Status401Unauthorized)
             .ProducesValidationProblem();
 
         rootGroup

@@ -17,4 +17,5 @@ public static class ContentTypes
     public const string TextJavascript = "text/javascript";
     public const string TextPlain = "text/plain";
     public const string TextPlainUtf8 = "text/plain; charset=utf-8";
+    public const string ProblemDetailsContentType = "application/problem+json";
 }

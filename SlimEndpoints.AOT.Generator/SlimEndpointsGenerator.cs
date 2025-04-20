@@ -21,7 +21,7 @@ namespace SlimEndpoints.AOT.Generator
 
         private static readonly string iSlimEndpointWithoutResponse = "SlimEndpointWithoutResponse<";
         private static readonly string slimEndpointPipelineAttribute = "SlimEndpoints.AOT.SlimEndpointPipelineAttribute";
-        private static readonly string iSlimEndpointPipelineType = "SlimEndpointPipeline<";
+        //private static readonly string iSlimEndpointPipelineType = "SlimEndpointPipeline<";
         private static readonly string unit = "SlimEndpoints.AOT.Unit";
         private static readonly string iResult = "Microsoft.AspNetCore.Http.IResult";
 
