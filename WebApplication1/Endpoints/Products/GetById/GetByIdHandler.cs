@@ -16,6 +16,7 @@ public class GetProductByIdHandler : SlimEndpointProduce<GetProductsRequest, Pro
     //}
     public override void Configure(RouteHandlerBuilder builder)
     {
+        builder.WithOpenApi(options => { options.OperationId = "GetProductById"; return options; });
         //builder.Produces<Product>(StatusCodes.Status200OK);
     }
 

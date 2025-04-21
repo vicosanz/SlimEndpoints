@@ -113,6 +113,7 @@ namespace SlimEndpoints.AOT.Generator
                     {
                         WriteLine($"route.Produces(StatusCodes.Status200OK);");
                     }
+                    WriteLine($"route.WithName(\"{metadata.NameTyped}\");");
                     WriteLine($"endpoint.Configure(route);");
                 });
                 WriteBrace($"public override {metadata.RequestType} ParseRequestFromFilterContext(Microsoft.AspNetCore.Http.EndpointFilterInvocationContext context)", () =>

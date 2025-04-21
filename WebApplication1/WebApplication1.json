@@ -10,6 +10,7 @@
         "tags": [
           "Weather Forecast"
         ],
+        "operationId": "GetStream",
         "parameters": [
           {
             "name": "id",
@@ -120,6 +121,7 @@
         "tags": [
           "Weather Forecast"
         ],
+        "operationId": "GetWeatherForecasts",
         "responses": {
           "500": {
             "description": "Internal Server Error",
@@ -165,6 +167,7 @@
         "tags": [
           "Weather Forecast"
         ],
+        "operationId": "UpdateWeatherForecast",
         "parameters": [
           {
             "name": "Id",
@@ -228,6 +231,7 @@
         "tags": [
           "Weather Forecast"
         ],
+        "operationId": "UpdateWeatherForecasts",
         "requestBody": {
           "content": {
             "application/json": {
@@ -280,6 +284,7 @@
         "tags": [
           "Products"
         ],
+        "operationId": "GetProductByIdHandler",
         "parameters": [
           {
             "name": "id",
@@ -333,6 +338,7 @@
         "tags": [
           "Products"
         ],
+        "operationId": "GetProductsHandler",
         "responses": {
           "500": {
             "description": "Internal Server Error",
@@ -378,6 +384,7 @@
         "tags": [
           "Products"
         ],
+        "operationId": "PostSlug2",
         "parameters": [
           {
             "name": "slug",
@@ -433,6 +440,7 @@
         "tags": [
           "Products"
         ],
+        "operationId": "PostSlug",
         "parameters": [
           {
             "name": "slug",
@@ -488,6 +496,7 @@
         "tags": [
           "Products"
         ],
+        "operationId": "PostUploadMultipartFormDataNonStandard",
         "parameters": [
           {
             "name": "id",
@@ -534,6 +543,7 @@
         "tags": [
           "Products"
         ],
+        "operationId": "PostUploadMultipartFormDataNonStandardBinding1",
         "parameters": [
           {
             "name": "id",
@@ -598,6 +608,7 @@
         "tags": [
           "Products"
         ],
+        "operationId": "PostUploadMultipartFormDataStandard",
         "parameters": [
           {
             "name": "id",
